@@ -1,0 +1,114 @@
+.Admin
+{
+  display: flex;
+}
+@media (max-width:800px) {
+  .Admin{
+    flex-direction:column ;
+  }
+}
+/* Admin Main Container */
+.Admin {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+.AdminContent {
+  flex: 1;
+  padding: 2rem;
+}
+
+/* Welcome Message Styles */
+.admin-welcome {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-welcome h1 {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #7f8c8d;
+  font-size: 1.2rem;
+  margin-bottom: 3rem;
+}
+
+/* Quick Access Cards */
+.admin-quick-access {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.access-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.access-card:hover {
+  transform: translateY(-5px);
+}
+
+.access-card h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.access-card p {
+  color: #7f8c8d;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.access-button {
+  display: inline-block;
+  background: #3498db;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.access-button:hover {
+  background: #2980b9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .AdminContent {
+    padding: 1rem;
+  }
+
+  .admin-welcome h1 {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .admin-quick-access {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .access-card {
+    padding: 1.5rem;
+  }
+  
+  .access-button {
+    width: 100%;
+    text-align: center;
+  }
+}

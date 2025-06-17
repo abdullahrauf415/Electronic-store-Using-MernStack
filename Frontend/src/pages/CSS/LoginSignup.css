@@ -1,0 +1,134 @@
+/* LoginSignup.css */
+
+.loginSignup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.loginSignup-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.loginSignup-container h1 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.loginSignup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.loginSignup-form input[type="text"],
+.loginSignup-form input[type="email"],
+.loginSignup-form input[type="password"] {
+  padding: 12px 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.loginSignup-form input:focus {
+  border-color: #007bff;
+}
+
+.password-input-container {
+  position: relative;
+}
+
+.password-input-container input {
+  width: 100%;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.checkbox-container input {
+  margin-right: 8px;
+}
+
+.checkbox-container label span {
+  color: #007bff;
+  cursor: pointer;
+}
+
+.signup-button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 12px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.signup-button:hover {
+  background-color: #0056b3;
+}
+
+.signup-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.loginsignup-toggle {
+  text-align: center;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
+.loginsignup-toggle span {
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Responsive styles */
+@media (max-width: 500px) {
+  .loginSignup-container {
+    padding: 1.5rem;
+  }
+
+  .loginSignup-container h1 {
+    font-size: 1.5rem;
+  }
+
+  .signup-button {
+    font-size: 0.95rem;
+  }
+
+  .loginSignup-form {
+    gap: 0.8rem;
+  }
+}

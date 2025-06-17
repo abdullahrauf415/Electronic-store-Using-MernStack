@@ -1,0 +1,131 @@
+.checkout-card {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  background-color: #f0f4f8;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.checkout-title {
+  grid-column: 1 / -1;
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #1e293b;
+  text-align: center;
+  font-weight: 700;
+}
+
+.order-card,
+.address-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.order-card h3,
+.address-card h3 {
+  font-size: 22px;
+  margin-bottom: 18px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.price-row,
+.total {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+  font-size: 16px;
+  color: #475569;
+}
+
+.total {
+  font-weight: bold;
+  color: #1e293b;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 10px;
+}
+
+/* Inputs and textarea */
+.checkout-input,
+.checkout-textarea {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 15px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  resize: vertical;
+  background-color: #f8fafc;
+  transition: border-color 0.3s;
+}
+
+.checkout-input:focus,
+.checkout-textarea:focus {
+  border-color: #3b82f6;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.map-select-btn {
+  margin-top: 12px;
+  padding: 10px 20px;
+  background-color: #e0f2fe;
+  color: #0284c7;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.map-select-btn:hover {
+  background-color: #bae6fd;
+}
+
+.checkout-button {
+  grid-column: 1 / -1;
+  display: block;
+  width: 30%;
+  text-align: center;
+  padding: 16px;
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 40px;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 30px;
+  transition: background-color 0.3s;
+}
+
+.checkout-button:hover {
+  background-color: #2563eb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .checkout-card {
+    grid-template-columns: 1fr;
+    padding: 20px 15px;
+  }
+
+  .checkout-title {
+    font-size: 24px;
+  }
+}
+.error-text {
+  color: #ef4444; /* Red color */
+  font-size: 14px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  padding-left: 5px;
+}

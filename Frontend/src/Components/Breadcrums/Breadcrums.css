@@ -1,0 +1,51 @@
+.breadcrums {
+  font-size: 14px;
+  color: #555;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 20px 30px;
+  background: linear-gradient(to right, #f9f9f9, #f1f1f1);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: 20px auto;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
+}
+
+.breadcrums img {
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .breadcrums {
+    font-size: 13px;
+    padding: 15px 20px;
+  }
+
+  .breadcrums img {
+    width: 11px;
+    height: 11px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .breadcrums {
+    font-size: 12px;
+    padding: 12px 15px;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  .breadcrums img {
+    width: 10px;
+    height: 10px;
+  }
+}

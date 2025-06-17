@@ -1,0 +1,256 @@
+import React, { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import HomeContext from "./HomeContext";
+
+const HomeProvider = ({ children }) => {
+  const [cartItems, setCartItems] = useState({});
+  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem("token");
+    setUser(null);
+    setIsAdmin(false);
+    setCartItems({});
+  }, []);
+
+  useEffect(() => {
+    const verifyAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data } = await axios.get("http://localhost:3000/verify-token", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setUser({ email: data.email, token });
+        setIsAdmin(data.isAdmin || false);
+
+        const cartRes = await axios.get("http://localhost:3000/get-cart", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setCartItems(cartRes.data.cartData || {});
+      } catch (error) {
+        console.error("Auth failed:", error);
+        logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifyAuth();
+  }, [logout]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setProductsLoading(true);
+      const token = localStorage.getItem("token");
+
+      try {
+        const config = token
+          ? { headers: { Authorization: `Bearer ${token}` } }
+          : {};
+        const response = await axios.get(
+          "http://localhost:3000/allproducts",
+          config
+        );
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+
+    if (!loading) {
+      fetchProducts();
+    }
+  }, [loading]);
+
+  const syncCart = useCallback(
+    async (cartData) => {
+      if (!user?.token) return;
+
+      try {
+        await axios.post(
+          "http://localhost:3000/update-cart",
+          { cartData },
+          { headers: { Authorization: `Bearer ${user.token}` } }
+        );
+      } catch (error) {
+        console.error("Cart sync failed:", error);
+        if (error.response?.status === 401) logout();
+      }
+    },
+    [user, logout]
+  );
+
+  // Add this inside your HomeProvider component
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (Object.keys(cartItems).length > 0) {
+        // Use sendBeacon for reliable synchronization
+        const data = JSON.stringify(cartItems);
+        navigator.sendBeacon(
+          "http://localhost:3000/update-cart",
+          new Blob([data], { type: "application/json" })
+        );
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [cartItems]);
+
+  const addToCart = (ItemId, size = "", color = "") => {
+    const product = products.find((p) => p.id === ItemId);
+    if (!product) return;
+
+    const selectedSize =
+      product.size.find((s) => s.size === size) || product.size[0];
+
+    const key = `${ItemId}_${selectedSize.size}_${color || "default"}`;
+
+    setCartItems((prev) => {
+      const newCart = {
+        ...prev,
+        [key]: prev[key]
+          ? {
+              ...prev[key],
+              quantity: prev[key].quantity + 1,
+              price: selectedSize.new_price,
+            }
+          : {
+              id: ItemId,
+              quantity: 1,
+              size: selectedSize.size,
+              color,
+              price: selectedSize.new_price,
+            },
+      };
+
+      syncCart(newCart);
+      return newCart;
+    });
+  };
+
+  const removeFromCart = (key) => {
+    setCartItems((prev) => {
+      const newCart = { ...prev };
+      if (newCart[key]?.quantity > 1) {
+        newCart[key].quantity -= 1;
+      } else {
+        delete newCart[key];
+      }
+      syncCart(newCart);
+      return newCart;
+    });
+  };
+
+  const loginUser = async (token, email, isAdminFlag = false) => {
+    localStorage.setItem("token", token);
+    setUser({ token, email });
+    setIsAdmin(isAdminFlag);
+
+    try {
+      const cartRes = await axios.get("http://localhost:3000/get-cart", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCartItems(cartRes.data.cartData || {});
+    } catch (error) {
+      console.error("Failed to fetch cart after login:", error);
+    }
+  };
+
+  const fetchCategoryProducts = useCallback(
+    async (category, page = 1, limit = 12) => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/products-by-category",
+          {
+            params: { category, page, limit },
+          }
+        );
+        return {
+          products: response.data.products,
+          total: response.data.total,
+        };
+      } catch (error) {
+        console.error("Failed to fetch category products:", error);
+        return { products: [], total: 0 };
+      }
+    },
+    []
+  );
+
+  const clearCart = async () => {
+    setCartItems({});
+
+    if (user?.token) {
+      try {
+        await axios.post(
+          "http://localhost:3000/update-cart",
+          { cartData: {} },
+          { headers: { Authorization: `Bearer ${user.token}` } }
+        );
+      } catch (error) {
+        console.error("Failed to clear cart on backend:", error);
+      }
+    }
+  };
+
+  const getTotalCartAmount = () =>
+    Object.values(cartItems).reduce((total, item) => {
+      const price = Number(item?.price) || 0;
+      const quantity = Number(item?.quantity) || 0;
+      return total + price * quantity;
+    }, 0);
+
+  const getTotalItemsInCart = useCallback(() => {
+    return Object.values(cartItems).reduce(
+      (total, item) => total + Number(item.quantity || 0),
+      0
+    );
+  }, [cartItems]);
+
+  useEffect(() => {
+    getTotalItemsInCart();
+  }, [cartItems, getTotalItemsInCart]);
+
+  return (
+    <HomeContext.Provider
+      value={{
+        products,
+        productsLoading,
+        cartItems,
+        setCartItems,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        getTotalCartAmount,
+        getTotalItemsInCart,
+        user,
+        isAdmin,
+        isLoggedIn: !!user,
+        loginUser,
+        logout,
+        loading,
+        fetchCategoryProducts,
+      }}
+    >
+      {!loading && !productsLoading && children}
+    </HomeContext.Provider>
+  );
+};
+
+export default HomeProvider;
