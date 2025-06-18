@@ -1,14 +1,26 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./CartItems.css";
 import HomeContext from "../../Context/HomeContext";
 import remove_icon from "../Assets/cart_cross_icon.png";
 
 const CartItems = () => {
-  const { getTotalCartAmount, products, cartItems, removeFromCart } =
-    useContext(HomeContext);
-
+  const {
+    getTotalCartAmount,
+    products,
+    cartItems,
+    removeFromCart,
+    isLoggedIn,
+  } = useContext(HomeContext);
+  const navigate = useNavigate();
   const isCartEmpty = Object.keys(cartItems).length === 0;
+  const handleProceed = () => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    } else if (!isCartEmpty) {
+      navigate("/Checkout");
+    }
+  };
 
   return (
     <div className="cart-items">
@@ -104,9 +116,13 @@ const CartItems = () => {
               <h3>Total</h3>
               <h3>Rs.{getTotalCartAmount()}</h3>
             </div>
-            <Link to="/Checkout">
-              <button>Proceed to Checkout</button>
-            </Link>
+            <button
+              onClick={handleProceed}
+              disabled={isCartEmpty}
+              className={!isLoggedIn ? "disabled-btn" : ""}
+            >
+              {isLoggedIn ? "Proceed to Checkout" : "Login to Checkout"}
+            </button>
           </div>
         </div>
       </div>

@@ -75,11 +75,18 @@
 
 .checkbox-container input {
   margin-right: 8px;
+  cursor: pointer;
+  margin-left: 2px;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #ccc;
 }
 
 .checkbox-container label span {
   color: #007bff;
   cursor: pointer;
+  margin-left: 2px;
+  font-weight: 500;
 }
 
 .signup-button {

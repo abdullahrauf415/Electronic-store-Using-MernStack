@@ -267,7 +267,7 @@ async function createAdminUser() {
     });
 
     await adminUser.save();
-    console.log(" Admin user created: abdullahrauf415@gmail.com / admin123");
+    console.log(" Admin user created: admin@gmail.com / admin123");
   } catch (err) {
     console.error(" Failed to create admin user:", err);
   }
