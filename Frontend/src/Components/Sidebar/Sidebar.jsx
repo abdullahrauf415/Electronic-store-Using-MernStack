@@ -24,6 +24,12 @@ const Sidebar = () => {
           <p>Order History</p>
         </div>
       </Link>
+      <Link to="/Admin/FaqManager" style={{ textDecoration: "none" }}>
+        <div className="sidebar-item">
+          <FaPlus className="sidebar-icon" />
+          <p>Manage FAQs</p>
+        </div>
+      </Link>
     </div>
   );
 };

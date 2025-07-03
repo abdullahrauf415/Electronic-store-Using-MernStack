@@ -1,0 +1,270 @@
+.footer {
+  background-color: #ffffff;
+  padding: 40px 20px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  color: #0f0f0f;
+  clear: both;
+}
+
+.footer-logo img {
+  width: 60px;
+  margin-right: 5px;
+}
+
+.footer-logo p {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.footer-links-section,
+.footer-faq-section {
+  flex: 1;
+  min-width: 250px;
+}
+
+.footer-links-section h4,
+.footer-faq-section h4,
+.footer-social h4 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #333;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+}
+
+/* Quick Links */
+.footer-links li {
+  margin-bottom: 12px;
+  font-size: 16px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.footer-links li a {
+  color: #333;
+  text-decoration: none;
+  position: relative;
+  padding-bottom: 3px;
+  display: inline-block;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.footer-links li a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background-color: #0071e3;
+  transition: width 0.3s ease;
+}
+
+.footer-links li a:hover {
+  color: #0071e3;
+}
+
+.footer-links li a:hover::after {
+  width: 100%;
+}
+.footer-info-box {
+  margin-top: 20px;
+  background: #ffffff;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  color: #333;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.footer-info-box h5 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #0071e3;
+}
+
+.close-info-btn {
+  margin-top: 10px;
+  padding: 5px 12px;
+  background-color: #0071e3;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.close-info-btn:hover {
+  background-color: #005bb5;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* FAQ Section */
+.faq-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.faq-item {
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0;
+  transition: color 0.3s ease;
+}
+
+.faq-question:hover {
+  color: #0071e3;
+}
+
+.faq-answer {
+  padding: 10px 0;
+  color: #666;
+  font-size: 15px;
+  line-height: 1.6;
+  transition: all 0.3s ease-in-out;
+}
+
+/* FAQ Download Button */
+.footer-faq-section button {
+  padding: 8px 16px;
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.footer-faq-section button:hover {
+  background-color: #005bb5;
+}
+
+/* Social Section */
+.footer-social {
+  margin-bottom: 30px;
+}
+
+.footer-social-icon {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-icon-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.footer-icon-container:hover {
+  transform: translateY(-3px);
+}
+
+.footer-icon-container img {
+  width: 22px;
+  height: 22px;
+}
+
+/* Footer Bottom */
+.footer hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin-bottom: 15px;
+}
+
+.footer p {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* Scrollbar Styling */
+.faq-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.faq-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.faq-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.faq-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .footer-logo {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .footer-logo img {
+    margin: 0 auto 10px;
+  }
+
+  .footer-social {
+    text-align: center;
+  }
+
+  .footer-social-icon {
+    justify-content: center;
+  }
+}

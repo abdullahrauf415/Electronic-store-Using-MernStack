@@ -233,13 +233,6 @@ const ListProduct = () => {
       </div>
 
       <div className="product-grid">
-        <span
-          className={`availability-badge ${
-            products.available ? "in-stock" : "out-of-stock"
-          }`}
-        >
-          {products.available ? "In Stock" : "Out of Stock"}
-        </span>
         {filteredProducts.map((product) => (
           <div className="product-card" key={product.id}>
             <div className="image-carousel">

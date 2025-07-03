@@ -1,13 +1,21 @@
-const port = 3000;
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import jsonwebtoken from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import generateFaqPDFRoute from "./Routes/generateFaqPDFRoute.js";
+import geminiChatRoute from "./Routes/geminiChat.js";
+import faqRoute from "./Routes/faqRoute.js";
+
 const app = express();
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-const jsonwebtoken = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
+const port = 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Middleware
 app.use(express.json());
@@ -144,7 +152,7 @@ app.post("/add-product", verifyAdmin, async (req, res) => {
   }
 });
 
-// Delete product (optional: protect with verifyAdmin)
+// Delete product
 app.post("/removeproduct", verifyAdmin, async (req, res) => {
   await Product.findOneAndDelete({ id: req.body.id });
   res.json({ success: true, name: req.body.name });
@@ -156,7 +164,7 @@ app.get("/allproducts", async (req, res) => {
   res.send(products);
 });
 
-// Update product protect with verifyAdmin
+// Update product
 app.post("/updateproduct", verifyAdmin, async (req, res) => {
   try {
     const { id, name, description, image, category, size, color } = req.body;
@@ -200,7 +208,8 @@ app.post("/updateproduct", verifyAdmin, async (req, res) => {
       .json({ success: false, message: "Failed to update product" });
   }
 });
-// Toggle product availability - admin only
+
+// Toggle product availability
 app.put("/toggle-availability/:id", verifyAdmin, async (req, res) => {
   try {
     const productId = parseInt(req.params.id);
@@ -309,7 +318,7 @@ app.post("/login", async (req, res) => {
   if (!user)
     return res.status(400).json({ success: false, message: "User not found" });
 
-  const isMatch = bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch)
     return res
       .status(400)
@@ -324,6 +333,7 @@ app.post("/login", async (req, res) => {
     isAdmin: user.isAdmin,
   });
 });
+
 // Verify token
 app.get("/verify-token", async (req, res) => {
   try {
@@ -352,6 +362,7 @@ app.get("/verify-token", async (req, res) => {
       .json({ success: false, message: "Invalid or expired token" });
   }
 });
+
 // Get products by category
 app.get("/products-by-category", async (req, res) => {
   try {
@@ -394,7 +405,7 @@ app.post("/place-order", async (req, res) => {
 
     const newOrder = {
       orderId: `ORD${Date.now()}`,
-      items: items.map((item) => item.name), // use items from req.body
+      items: items.map((item) => item.name),
       total,
       status: "Pending",
       date: new Date(),
@@ -433,7 +444,7 @@ app.get("/user-orders/:email", async (req, res) => {
 // Get all orders - admin only
 app.get("/get-all-orders", verifyAdmin, async (req, res) => {
   try {
-    const users = await Users.find({}, "email name orders").lean(); // .lean() returns plain JS objects
+    const users = await Users.find({}, "email name orders").lean();
     const allOrders = [];
 
     users.forEach((user) => {
@@ -549,6 +560,7 @@ const Review = mongoose.model("Review", {
   comment: String,
   date: { type: Date, default: Date.now },
 });
+
 // Verify Token Middleware
 const verifyToken = async (req, res, next) => {
   try {
@@ -575,6 +587,58 @@ const verifyToken = async (req, res, next) => {
       .json({ success: false, message: "Invalid or expired token" });
   }
 };
+
+// Remove an order for the logged-in user
+app.delete("/remove-order/:orderId", verifyToken, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const user = req.user;
+
+    const orderIndex = user.orders.findIndex((o) => o.orderId === orderId);
+
+    if (orderIndex === -1) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    // Prevent deletion of Shipped/Delivered orders
+    if (["Shipped", "Delivered"].includes(user.orders[orderIndex].status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot remove shipped or delivered orders",
+      });
+    }
+
+    user.orders.splice(orderIndex, 1);
+    await user.save();
+
+    res.json({ success: true, message: "Order removed successfully" });
+  } catch (err) {
+    console.error("Remove order error:", err);
+    res.status(500).json({ success: false, message: "Failed to remove order" });
+  }
+});
+
+// Get product reviews
+app.get("/product-reviews/:productId", async (req, res) => {
+  try {
+    const productId = parseInt(req.params.productId, 10);
+    if (isNaN(productId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid product ID" });
+    }
+
+    const reviews = await Review.find({ productId }).sort({ date: -1 });
+    res.json({ success: true, reviews });
+  } catch (err) {
+    console.error("Fetch reviews error:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch reviews" });
+  }
+});
 
 // Submit a review
 app.post("/submit-review", verifyToken, async (req, res) => {
@@ -629,64 +693,77 @@ app.post("/submit-review", verifyToken, async (req, res) => {
       .json({ success: false, message: "Failed to submit review" });
   }
 });
-
-// Get product reviews
-app.get("/product-reviews/:productId", async (req, res) => {
+// Delete a review
+app.delete("/delete-review/:reviewId", verifyToken, async (req, res) => {
   try {
-    const productId = parseInt(req.params.productId, 10);
-    if (isNaN(productId)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid product ID" });
-    }
-
-    const reviews = await Review.find({ productId }).sort({ date: -1 });
-    res.json({ success: true, reviews });
-  } catch (err) {
-    console.error("Fetch reviews error:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch reviews" });
-  }
-});
-// GET Product Reviews
-app.get("/product-reviews/:productId", async (req, res) => {
-  try {
-    const productId = parseInt(req.params.productId);
-    if (isNaN(productId))
-      return res.status(400).json({ error: "Invalid product ID" });
-
-    const reviews = await Review.find({ productId }).sort({ date: -1 });
-    res.json({ success: true, reviews });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch reviews" });
-  }
-});
-
-// POST Submit Review
-app.post("/submit-review", verifyToken, async (req, res) => {
-  try {
-    const { productId, comment, rating } = req.body;
+    const { reviewId } = req.params;
     const user = req.user;
 
-    if (!productId || !comment || !rating) {
-      return res.status(400).json({ error: "Missing required fields" });
+    const review = await Review.findById(reviewId);
+
+    if (!review) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Review not found" });
     }
 
-    const review = new Review({
-      productId,
-      userId: user._id,
-      userName: user.name,
-      rating,
-      comment,
-    });
+    // Check if the review belongs to the logged-in user
+    if (review.userId.toString() !== user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to delete this review",
+      });
+    }
 
-    await review.save();
-    res.json({ success: true, review });
+    await Review.findByIdAndDelete(reviewId);
+
+    res.json({ success: true, message: "Review deleted successfully" });
   } catch (err) {
-    res.status(500).json({ error: "Failed to submit review" });
+    console.error("Delete review error:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to delete review" });
   }
 });
+
+// Social Media Links Schema
+const SocialMediaLink = mongoose.model("SocialMediaLink", {
+  platform: String,
+  url: String,
+});
+
+// Get social media links
+app.get("/api/social-media", async (req, res) => {
+  try {
+    const links = await SocialMediaLink.find();
+    res.json({ success: true, links });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Failed to fetch links" });
+  }
+});
+
+// Update social media links (admin only)
+app.post("/api/update-social-media", verifyAdmin, async (req, res) => {
+  try {
+    const { platform, url } = req.body;
+
+    // Update existing or create new
+    await SocialMediaLink.findOneAndUpdate(
+      { platform },
+      { url },
+      { upsert: true, new: true }
+    );
+
+    res.json({ success: true, message: "Link updated successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Failed to update link" });
+  }
+});
+
+// Use the routes
+app.use("/api", generateFaqPDFRoute);
+app.use("/api", geminiChatRoute);
+app.use("/api", faqRoute);
 
 // Start server
 app.listen(port, (error) => {

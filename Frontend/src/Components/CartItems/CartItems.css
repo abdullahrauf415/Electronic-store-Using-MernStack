@@ -131,7 +131,6 @@ hr {
   cursor: pointer;
   transition: background 0.3s ease;
 }
-
 .cartitems-down-total button:hover {
   background: linear-gradient(135deg, #2f9e44, #228c3f);
 }

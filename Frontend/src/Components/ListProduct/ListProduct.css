@@ -9,7 +9,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2rem
 }
 
 .page-title {
@@ -89,9 +89,11 @@
 }
 
 .product-description {
-  color: #718096;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* Show only 4 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .price-section {

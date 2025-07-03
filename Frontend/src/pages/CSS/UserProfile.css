@@ -95,19 +95,7 @@
   color: white;
 }
 
-.receipt-button {
-  background: #27ae60;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
 
-.receipt-button:hover {
-  background: #219a52;
-}
 
 .status-pending {
   color: #f1c40f;
@@ -122,6 +110,26 @@
 .status-cancelled {
   color: #e74c3c;
   font-weight: bold;
+}
+/* Add to UserProfile.css */
+.remove-order-btn {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.remove-order-btn:hover:not(:disabled) {
+  background-color: #ff1a1a;
+}
+
+.remove-order-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .error-state {

@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import HomeContext from "../Context/HomeContext";
 import "./CSS/Checkout.css";
 
@@ -61,7 +61,6 @@ const Checkout = () => {
   return (
     <div className="checkout-card">
       <h2 className="checkout-title">Step 2: Delivery Details</h2>
-
       <div className="order-card">
         <h3>Order Summary</h3>
         <div className="price-row">
@@ -116,7 +115,9 @@ const Checkout = () => {
           📍 Select from Map
         </button>
       </div>
-
+      <Link to="/Cart" className="back-link">
+        ← Return to Cart
+      </Link>
       <button onClick={handleProceed} className="checkout-button">
         Proceed to Payment →
       </button>

@@ -2,23 +2,27 @@ import React, { useState, useEffect } from "react";
 import "./DescriptionBox.css";
 import axios from "axios";
 import PropTypes from "prop-types";
+import { jwtDecode } from "jwt-decode";
 
-const DescriptionBox = ({ productId }) => {
+const DescriptionBox = ({ productId, description }) => {
   const [activeTab, setActiveTab] = useState("description");
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ comment: "", rating: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isMounted, setIsMounted] = useState(true);
-
-  // Prop type validation
-  DescriptionBox.propTypes = {
-    productId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-      .isRequired,
-  };
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
-    return () => setIsMounted(false);
+    // Get current user ID from token
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setCurrentUserId(decoded.user.id);
+      } catch (err) {
+        console.error("Token decode error:", err);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -27,7 +31,9 @@ const DescriptionBox = ({ productId }) => {
         const parsedId = parseInt(productId, 10);
         if (isNaN(parsedId)) throw new Error("Invalid product ID");
 
-        const response = await axios.get(`/api/product-reviews/${parsedId}`);
+        const response = await axios.get(
+          `http://localhost:3000/product-reviews/${parsedId}`
+        );
         setReviews(response.data.reviews || []);
         setError("");
       } catch (err) {
@@ -56,7 +62,7 @@ const DescriptionBox = ({ productId }) => {
       if (!token) throw new Error("Please login to submit a review");
 
       const response = await axios.post(
-        "/api/submit-review",
+        "http://localhost:3000/submit-review",
         {
           productId: parsedId,
           comment: newReview.comment.trim(),
@@ -70,6 +76,32 @@ const DescriptionBox = ({ productId }) => {
       setReviews((prev) => [response.data.review, ...prev]);
       setNewReview({ comment: "", rating: 0 });
       setError("");
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm("Are you sure you want to delete this review?")) return;
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Please login to delete review");
+
+      const response = await axios.delete(
+        `http://localhost:3000/delete-review/${reviewId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.success) {
+        setReviews((prev) => prev.filter((review) => review._id !== reviewId));
+        setError("");
+      }
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -106,18 +138,9 @@ const DescriptionBox = ({ productId }) => {
       <div className="descriptionbox-description">
         {activeTab === "description" && (
           <>
-            <h3>About Our Platform</h3>
-            <p>
-              The AI-Assisted Electronics and Gadgets Store is an innovative
-              e-commerce solution tailored to meet the growing demands of modern
-              consumers...
-            </p>
-
-            <h3>Intelligent Shopping Experience</h3>
-            <p>
-              Our platform integrates advanced artificial intelligence to
-              enhance user engagement and satisfaction...
-            </p>
+            <div className="product-display-description">
+              {description || "No description available."}
+            </div>
           </>
         )}
 
@@ -193,6 +216,18 @@ const DescriptionBox = ({ productId }) => {
                     <div className="review-rating">
                       {renderStars(review.rating)}
                       <span className="rating-text">({review.rating}/5)</span>
+
+                      {/* Delete button for the review author */}
+                      {currentUserId && review.userId === currentUserId && (
+                        <button
+                          className="delete-review-btn"
+                          onClick={() => handleDeleteReview(review._id)}
+                          disabled={loading}
+                          aria-label="Delete review"
+                        >
+                          🗑️ Delete
+                        </button>
+                      )}
                     </div>
                     <p className="review-comment">{review.comment}</p>
                   </div>

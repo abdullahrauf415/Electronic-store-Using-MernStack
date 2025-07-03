@@ -119,7 +119,7 @@ const CartItems = () => {
             <button
               onClick={handleProceed}
               disabled={isCartEmpty}
-              className={!isLoggedIn ? "disabled-btn" : ""}
+              className={!isLoggedIn ? "disabled-btn , pointer" : ""}
             >
               {isLoggedIn ? "Proceed to Checkout" : "Login to Checkout"}
             </button>

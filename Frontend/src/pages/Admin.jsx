@@ -1,21 +1,45 @@
 import React from "react";
 import "./CSS/Admin.css";
 import Sidebar from "../Components/Sidebar/Sidebar";
-import { Routes, Route, Link } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import AddProduct from "../Components/AddProduct/AddProduct";
 import ListProduct from "../Components/ListProduct/ListProduct";
 import OrderHistory from "../Components/OrderHistory/OrderHistory";
+import FaqManager from "../Components/FaqManager/FaqManager";
 
 const Admin = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isWelcomePage =
+    location.pathname.endsWith("/admin") ||
+    location.pathname.endsWith("/admin/");
+
   return (
     <div className="Admin">
       <Sidebar />
       <div className="AdminContent">
+        {!isWelcomePage && (
+          <button
+            className="admin-back-button"
+            onClick={() => navigate("/admin")}
+          >
+            ← Back to Dashboard
+          </button>
+        )}
+
         <Routes>
           <Route index element={<WelcomeMessage />} />
           <Route path="AddProduct" element={<AddProduct />} />
           <Route path="ListProduct" element={<ListProduct />} />
           <Route path="OrderHistory" element={<OrderHistory />} />
+          <Route path="FaqManager" element={<FaqManager />} />
+          <Route path="*" element={<div>Page Not Found</div>} />
         </Routes>
       </div>
     </div>
@@ -50,6 +74,14 @@ const WelcomeMessage = () => {
           <p>Review all customer orders and transaction details</p>
           <Link to="OrderHistory" className="access-button">
             View Order History →
+          </Link>
+        </div>
+
+        <div className="access-card">
+          <h2>FAQ Manager</h2>
+          <p>Manage frequently asked questions and answers</p>
+          <Link to="FaqManager" className="access-button">
+            Go to FAQ Manager →
           </Link>
         </div>
       </div>

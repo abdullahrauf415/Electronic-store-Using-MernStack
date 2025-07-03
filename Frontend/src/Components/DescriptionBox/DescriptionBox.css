@@ -172,6 +172,34 @@
   border: 1px solid #f5c6cb;
 }
 
+.delete-review-btn {
+  margin-left: 15px;
+  padding: 4px 8px;
+  background: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  color: #e74c3c;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-review-btn:hover {
+  background: #ffecec;
+  border-color: #e74c3c;
+}
+
+.delete-review-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.review-rating {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

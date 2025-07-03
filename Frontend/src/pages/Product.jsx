@@ -4,6 +4,7 @@ import HomeContext from "../Context/HomeContext";
 import ProductDisplay from "../Components/ProductDisplay/ProductDisplay";
 import DescriptionBox from "../Components/DescriptionBox/DescriptionBox";
 import RelatedProduct from "../Components/RelatedProduct/RelatedProduct";
+import Breadcrums from "../Components/Breadcrums/Breadcrums";
 
 const Product = () => {
   const { products } = useContext(HomeContext);
@@ -15,8 +16,12 @@ const Product = () => {
 
   return (
     <div>
+      <Breadcrums product={product} />
       <ProductDisplay product={product} />
-      <DescriptionBox productId={product.id} />
+      <DescriptionBox
+        productId={product.id}
+        description={product.description}
+      />
       <RelatedProduct
         category={product.category}
         currentProductId={product.id}

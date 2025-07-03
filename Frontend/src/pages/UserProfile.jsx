@@ -64,6 +64,26 @@ const UserProfile = () => {
     );
   }
 
+  const removeOrder = async (orderId) => {
+    if (!window.confirm("Are you sure you want to remove this order?")) return;
+
+    try {
+      const response = await axios.delete(
+        `http://localhost:3000/remove-order/${orderId}`,
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+
+      if (response.data.success) {
+        setOrders(orders.filter((order) => order.orderId !== orderId));
+      } else {
+        alert(response.data.message || "Failed to remove order");
+      }
+    } catch (err) {
+      console.error("Order removal error:", err);
+      alert(err.response?.data?.message || "Error removing order");
+    }
+  };
+
   return (
     <div className="user-profile-container">
       <h1>Your Profile</h1>
@@ -182,6 +202,7 @@ const UserProfile = () => {
                 <th>Date</th>
                 <th>Total (Rs.)</th>
                 <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -198,6 +219,20 @@ const UserProfile = () => {
                     className={`status-${(order.status || "").toLowerCase()}`}
                   >
                     {order.status || "N/A"}
+                  </td>
+                  <td>
+                    <button
+                      className="remove-order-btn"
+                      onClick={() => removeOrder(order.orderId)}
+                      disabled={["Shipped", "Delivered"].includes(order.status)}
+                      title={
+                        ["Shipped", "Delivered"].includes(order.status)
+                          ? "Cannot remove shipped/delivered orders"
+                          : "Remove order"
+                      }
+                    >
+                      Remove
+                    </button>
                   </td>
                 </tr>
               ))}

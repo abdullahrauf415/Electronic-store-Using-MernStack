@@ -115,8 +115,6 @@ const ProductDisplay = ({ product }) => {
           )}
         </div>
 
-        <div className="product-display-description">{product.description}</div>
-
         {product.size?.length > 0 && (
           <div className="product-options">
             <h2>Select Size</h2>
