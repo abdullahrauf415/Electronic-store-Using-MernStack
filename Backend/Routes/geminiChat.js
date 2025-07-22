@@ -61,7 +61,7 @@ router.post("/chat", async (req, res) => {
       }
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
 You are a helpful assistant for an electronics store.

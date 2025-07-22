@@ -1,5 +1,4 @@
 import "./Navbar.css";
-import nav_dropdown from "../Assets/nav_dropdown.png";
 import logo from "../Assets/logo.png";
 import cart_icon from "../Assets/cart_icon.png";
 import { useContext, useRef, useState, useEffect } from "react";
@@ -13,6 +12,7 @@ const Navbar = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(0);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const {
     getTotalItemsInCart,
@@ -94,47 +94,66 @@ const Navbar = () => {
     setMenu(activeMenuItem);
   }, [location.pathname]);
 
-  const dropdown_toggle = (e) => {
-    menuref.current.classList.toggle("nav-menu-visible");
-    e.target.classList.toggle("open");
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
   };
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuref.current && !menuref.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="navbar">
       <div className="nav-logo">
         <img src={logo} alt="logo" className="logo" />
-        <p>
-          GadgetStore<span>AI Assisted Electronics And Gadgets Store</span>
-        </p>
+        <div className="logo-text">
+          <span className="primary">GadgetStore</span>
+          <span className="secondary">
+            AI Assisted Electronics And Gadgets Store
+          </span>
+        </div>
       </div>
 
-      <img
-        src={nav_dropdown}
-        alt="menu"
-        className="nav-dropdown"
-        onClick={dropdown_toggle}
-      />
-      <ul ref={menuref} className="nav-menu">
+      <button
+        className={`menu-toggle ${menuOpen ? "active" : ""}`}
+        onClick={toggleMenu}
+        aria-label="Toggle menu"
+      >
+        <span className="menu-icon"></span>
+      </button>
+
+      <ul ref={menuref} className={`nav-menu ${menuOpen ? "active" : ""}`}>
         {["Home", "Electronics", "Gadgets", "Accessories"].map((item) => (
           <li key={item}>
             <Link
               to={`/${item === "Home" ? "" : item}`}
-              style={{ textDecoration: "none" }}
+              className="nav-link"
               onClick={() => {
                 setMenu(item);
+                setMenuOpen(false);
                 if (item === "Home") {
                   navigate("/", { replace: true });
                 }
               }}
             >
               {item === "Electronics" ? "Household Appliances" : item}
+              {menu === item && <hr />}
             </Link>
-            {menu === item && <hr />}
           </li>
         ))}
       </ul>
 
-      <div className="nav-login-cart">
+      <div className="nav-actions">
         <div className="search-container">
           <div className="search-input-wrapper">
             <input
@@ -147,8 +166,13 @@ const Navbar = () => {
                 setShowSuggestions(!!e.target.value);
               }}
               onKeyDown={handleKeyDown}
+              onFocus={() => setShowSuggestions(!!searchQuery)}
             />
-            <button className="search-icon-button" onClick={handleSearch}>
+            <button
+              className="search-icon-button"
+              onClick={handleSearch}
+              aria-label="Search"
+            >
               <FaSearch className="search-icon" />
             </button>
           </div>
@@ -189,23 +213,31 @@ const Navbar = () => {
                 {isAdmin ? (
                   <div
                     className="dropdown-item"
-                    onClick={() => navigate("/admin")}
+                    onClick={() => {
+                      navigate("/admin");
+                      setShowProfileDropdown(false);
+                    }}
                   >
                     🛠 Admin Dashboard
                   </div>
                 ) : (
                   <div
                     className="dropdown-item"
-                    onClick={() => navigate("/UserProfile")}
+                    onClick={() => {
+                      navigate("/UserProfile");
+                      setShowProfileDropdown(false);
+                    }}
                   >
                     👤 Your Profile
                   </div>
                 )}
+                <div className="dropdown-divider"></div>
                 <div
                   className="dropdown-item logout"
                   onClick={() => {
                     logout();
                     navigate("/");
+                    setShowProfileDropdown(false);
                   }}
                 >
                   🚪 Logout
@@ -215,15 +247,15 @@ const Navbar = () => {
           </div>
         ) : (
           <Link to="/login">
-            <button>Login</button>
+            <button className="auth-button">Login</button>
           </Link>
         )}
 
-        <div className="nav-cart-wrapper">
+        <div className="cart-icon-wrapper">
           <Link to="/cart">
-            <img src={cart_icon} alt="cart" />
+            <img src={cart_icon} alt="cart" className="cart-icon" />
           </Link>
-          <div className="nav-cart-count">{getTotalItemsInCart()}</div>
+          <div className="cart-badge">{getTotalItemsInCart()}</div>
         </div>
       </div>
     </div>
