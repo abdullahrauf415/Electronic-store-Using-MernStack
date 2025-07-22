@@ -11,6 +11,10 @@ import { dirname } from "path";
 import generateFaqPDFRoute from "./Routes/generateFaqPDFRoute.js";
 import geminiChatRoute from "./Routes/geminiChat.js";
 import faqRoute from "./Routes/faqRoute.js";
+import dotenv from "dotenv";
+
+//load environment variables
+dotenv.config;
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,14 +26,16 @@ app.use(express.json());
 app.use(cors());
 
 // Ensure upload directory exists
-const uploadDir = "./upload/images";
+const uploadDir = process.env.UPLOAD_DIR || "./upload/images";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // MongoDB connection
 mongoose
-  .connect("mongodb://localhost:27017/electronic-store")
+  .connect(
+    process.env.MONGO_URI || "mongodb://localhost:27017/electronic-store"
+  )
   .then(async () => {
     console.log("Connected to MongoDB");
     await createAdminUser();
@@ -45,7 +51,7 @@ const verifyAdmin = async (req, res, next) => {
         .status(401)
         .json({ success: false, message: "No token provided" });
 
-    const decoded = jsonwebtoken.verify(token, "secret_ecom");
+    const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
     const user = await Users.findById(decoded.user.id);
 
     if (!user || !user.isAdmin) {
@@ -62,7 +68,6 @@ const verifyAdmin = async (req, res, next) => {
       .json({ success: false, message: "Invalid or expired token" });
   }
 };
-
 // Test route
 app.get("/", (req, res) => {
   res.send("API is working");
@@ -259,26 +264,26 @@ const Users = mongoose.model("Users", {
 async function createAdminUser() {
   try {
     const existingAdmin = await Users.findOne({
-      email: "abdullahrauf415@gmail.com",
+      email: process.env.ADMIN_EMAIL,
     });
     if (existingAdmin) return console.log("✅ Admin already exists");
 
-    const hashedPassword = await bcrypt.hash("admin123", 10);
+    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
     const cart = {};
     for (let i = 0; i < 300; i++) cart[i] = 0;
 
     const adminUser = new Users({
       name: "Admin",
-      email: "abdullahrauf415@gmail.com",
+      email: process.env.ADMIN_EMAIL,
       password: hashedPassword,
       cartData: cart,
       isAdmin: true,
     });
 
     await adminUser.save();
-    console.log(" Admin user created: admin@gmail.com / admin123");
+    console.log(`Admin user created: ${process.env.ADMIN_EMAIL}`);
   } catch (err) {
-    console.error(" Failed to create admin user:", err);
+    console.error("Failed to create admin user:", err);
   }
 }
 
@@ -325,7 +330,10 @@ app.post("/login", async (req, res) => {
       .json({ success: false, message: "Incorrect password" });
 
   const data = { user: { id: user.id, name: user.name } };
-  const token = jsonwebtoken.sign(data, "secret_ecom", { expiresIn: "1h" });
+  // Use JWT_SECRET from env
+  const token = jsonwebtoken.sign(data, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
   res.json({
     success: true,
     token,
@@ -333,7 +341,6 @@ app.post("/login", async (req, res) => {
     isAdmin: user.isAdmin,
   });
 });
-
 // Verify token
 app.get("/verify-token", async (req, res) => {
   try {
@@ -343,7 +350,8 @@ app.get("/verify-token", async (req, res) => {
         .status(401)
         .json({ success: false, message: "No token provided" });
 
-    const decoded = jsonwebtoken.verify(token, "secret_ecom");
+    // Use JWT_SECRET from env
+    const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
     const user = await Users.findById(decoded.user.id);
     if (!user)
       return res
@@ -571,7 +579,8 @@ const verifyToken = async (req, res, next) => {
         .json({ success: false, message: "No token provided" });
     }
 
-    const decoded = jsonwebtoken.verify(token, "secret_ecom");
+    // Use JWT_SECRET from env
+    const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
     const user = await Users.findById(decoded.user.id);
     if (!user) {
       return res
@@ -587,7 +596,6 @@ const verifyToken = async (req, res, next) => {
       .json({ success: false, message: "Invalid or expired token" });
   }
 };
-
 // Remove an order for the logged-in user
 app.delete("/remove-order/:orderId", verifyToken, async (req, res) => {
   try {
