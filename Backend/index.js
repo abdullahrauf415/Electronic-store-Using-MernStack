@@ -469,6 +469,53 @@ app.get("/get-all-orders", verifyAdmin, async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch orders" });
   }
 });
+app.delete("/admin/delete-order", verifyAdmin, async (req, res) => {
+  try {
+    const { email, orderId } = req.body;
+
+    // Validate input
+    if (!email || !orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and order ID are required",
+      });
+    }
+
+    // Find user and update orders
+    const user = await Users.findOneAndUpdate(
+      { email },
+      { $pull: { orders: { orderId } } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Check if order was actually removed
+    const orderExists = user.orders.some((order) => order.orderId === orderId);
+    if (orderExists) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found in user's orders",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Order deleted successfully",
+    });
+  } catch (err) {
+    console.error("Admin delete order error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete order",
+    });
+  }
+});
 
 // Update order status
 app.post("/update-order-status", verifyAdmin, async (req, res) => {
@@ -733,41 +780,260 @@ app.delete("/delete-review/:reviewId", verifyToken, async (req, res) => {
       .json({ success: false, message: "Failed to delete review" });
   }
 });
-
-// Social Media Links Schema
+// Social Media Links schema
 const SocialMediaLink = mongoose.model("SocialMediaLink", {
-  platform: String,
-  url: String,
+  platform: { type: String, required: true, unique: true },
+  url: { type: String, required: true },
+  icon: String, // Optional icon field
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
-
-// Get social media links
-app.get("/api/social-media", async (req, res) => {
+// Get all social media links
+app.get("/social-media-links", async (req, res) => {
   try {
-    const links = await SocialMediaLink.find();
+    const links = await SocialMediaLink.find({});
     res.json({ success: true, links });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Failed to fetch links" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch social media links",
+    });
   }
 });
-
-// Update social media links (admin only)
-app.post("/api/update-social-media", verifyAdmin, async (req, res) => {
+// Add new social media link - Admin only
+app.post("/social-media-links", verifyAdmin, async (req, res) => {
   try {
-    const { platform, url } = req.body;
+    const { platform, url, icon } = req.body;
 
-    // Update existing or create new
-    await SocialMediaLink.findOneAndUpdate(
-      { platform },
-      { url },
-      { upsert: true, new: true }
+    if (!platform || !url) {
+      return res.status(400).json({
+        success: false,
+        message: "Platform and URL are required",
+      });
+    }
+
+    // Check if platform already exists
+    const existingLink = await SocialMediaLink.findOne({ platform });
+    if (existingLink) {
+      return res.status(409).json({
+        success: false,
+        message: "Platform already exists. Use update instead.",
+      });
+    }
+
+    const newLink = new SocialMediaLink({
+      platform,
+      url,
+      icon: icon || "",
+    });
+
+    await newLink.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Social media link added",
+      link: newLink,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to add social media link",
+    });
+  }
+});
+// Update social media link - Admin only
+app.put("/social-media-links/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { url, icon } = req.body;
+
+    if (!url) {
+      return res.status(400).json({
+        success: false,
+        message: "URL is required",
+      });
+    }
+
+    const updatedLink = await SocialMediaLink.findByIdAndUpdate(
+      id,
+      {
+        url,
+        icon: icon || "",
+        updatedAt: Date.now(),
+      },
+      { new: true }
     );
 
-    res.json({ success: true, message: "Link updated successfully" });
+    if (!updatedLink) {
+      return res.status(404).json({
+        success: false,
+        message: "Social media link not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Social media link updated",
+      link: updatedLink,
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Failed to update link" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update social media link",
+    });
   }
 });
 
+// Delete social media link - Admin only
+app.delete("/social-media-links/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedLink = await SocialMediaLink.findByIdAndDelete(id);
+
+    if (!deletedLink) {
+      return res.status(404).json({
+        success: false,
+        message: "Social media link not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Social media link deleted",
+      link: deletedLink,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete social media link",
+    });
+  }
+});
+// Quick Link Schema
+const QuickLink = mongoose.model("QuickLink", {
+  title: { type: String, required: true },
+  content: { type: String, required: true },
+  icon: String,
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+// Get all quick links
+app.get("/quick-links", async (req, res) => {
+  try {
+    const links = await QuickLink.find({}).sort({ createdAt: -1 });
+    res.json({ success: true, links });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch quick links",
+    });
+  }
+});
+
+// Add new quick link - Admin only
+app.post("/quick-links", verifyAdmin, async (req, res) => {
+  try {
+    const { title, content, icon } = req.body;
+
+    if (!title || !content) {
+      return res.status(400).json({
+        success: false,
+        message: "Title and content are required",
+      });
+    }
+
+    const newLink = new QuickLink({
+      title,
+      content,
+      icon: icon || "",
+    });
+
+    await newLink.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Quick link added",
+      link: newLink,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to add quick link",
+    });
+  }
+});
+
+// Update quick link - Admin only
+app.put("/quick-links/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, icon } = req.body;
+
+    if (!title || !content) {
+      return res.status(400).json({
+        success: false,
+        message: "Title and content are required",
+      });
+    }
+
+    const updatedLink = await QuickLink.findByIdAndUpdate(
+      id,
+      {
+        title,
+        content,
+        icon: icon || "",
+        updatedAt: Date.now(),
+      },
+      { new: true }
+    );
+
+    if (!updatedLink) {
+      return res.status(404).json({
+        success: false,
+        message: "Quick link not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Quick link updated",
+      link: updatedLink,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update quick link",
+    });
+  }
+});
+
+// Delete quick link - Admin only
+app.delete("/quick-links/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedLink = await QuickLink.findByIdAndDelete(id);
+
+    if (!deletedLink) {
+      return res.status(404).json({
+        success: false,
+        message: "Quick link not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Quick link deleted",
+      link: deletedLink,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete quick link",
+    });
+  }
+});
 // Use the routes
 app.use("/api", generateFaqPDFRoute);
 app.use("/api", geminiChatRoute);

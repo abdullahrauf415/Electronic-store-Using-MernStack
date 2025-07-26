@@ -3,61 +3,80 @@ import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import Faq from "../Models/faq.js"; // <-- Make sure this path is correct
+import Faq from "../Models/faq.js";
+import { setFaqCacheDirty } from "../cache/faqCache.js"; // <-- create this (see below)
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const router = express.Router();
 
-// Function to generate text-extractable PDF
-const generateFaqPDF = (faqs) => {
-  return new Promise((resolve, reject) => {
-    try {
-      const doc = new PDFDocument();
-      doc.registerFont("Helvetica", "Helvetica");
-      doc.font("Helvetica");
+function generateFaqPDFStream(faqs, writeStream) {
+  const doc = new PDFDocument({ autoFirstPage: true, margin: 50 });
+  doc.pipe(writeStream);
 
-      doc.fontSize(18).text("Frequently Asked Questions", { align: "center" });
-      doc.moveDown();
+  doc
+    .font("Helvetica")
+    .fontSize(18)
+    .text("Frequently Asked Questions", { align: "center" });
+  doc.moveDown();
 
-      faqs.forEach((faq, index) => {
-        doc
-          .fontSize(14)
-          .fillColor("black")
-          .text(`Q${index + 1}: ${faq.question}`);
-        doc.fontSize(12).fillColor("gray").text(`A: ${faq.answer}`).moveDown();
-      });
-
-      const buffers = [];
-      doc.on("data", buffers.push.bind(buffers));
-      doc.on("end", () => resolve(Buffer.concat(buffers)));
-      doc.end();
-    } catch (err) {
-      reject(err);
-    }
+  faqs.forEach((faq, i) => {
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(14)
+      .fillColor("black")
+      .text(`Q${i + 1}: ${faq.question}`);
+    doc
+      .font("Helvetica")
+      .fontSize(12)
+      .fillColor("gray")
+      .text(`A: ${faq.answer}`, { paragraphGap: 12 });
+    doc.moveDown();
   });
-};
 
-// GET /api/generate-faq-pdf
+  doc.end();
+}
+
+// GET /api/generate-faq-pdf?download=1
 router.get("/generate-faq-pdf", async (req, res) => {
   try {
-    const faqs = await Faq.find().limit(20); // Load up to 20 FAQs from MongoDB
-
+    const faqs = await Faq.find({}).sort({ createdAt: -1 }).limit(100); // raise if needed
     if (!faqs.length) {
-      return res.status(404).send("No FAQs found in the database.");
+      return res
+        .status(404)
+        .json({ success: false, message: "No FAQs found in the database." });
     }
 
-    const pdfBuffer = await generateFaqPDF(faqs);
+    // Ensure output dir
     const outputPath = path.join(__dirname, "../output/faq.pdf");
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-    fs.writeFileSync(outputPath, pdfBuffer);
 
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=faqs.pdf");
-    res.send(pdfBuffer);
+    // Write to disk
+    const diskStream = fs.createWriteStream(outputPath);
+    generateFaqPDFStream(faqs, diskStream);
+
+    // Also return to caller
+    if (req.query.download === "1") {
+      // Wait until disk write completes before streaming back
+      diskStream.on("finish", () => {
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", 'attachment; filename="faq.pdf"');
+        fs.createReadStream(outputPath).pipe(res);
+      });
+    } else {
+      // JSON success (faster API use)
+      diskStream.on("finish", () => {
+        setFaqCacheDirty(); // tell chatbot to reload PDF on next query
+        res.json({
+          success: true,
+          message: "FAQ PDF regenerated.",
+          count: faqs.length,
+        });
+      });
+    }
   } catch (error) {
     console.error("PDF generation error:", error);
-    res.status(500).send("Error generating PDF");
+    res.status(500).json({ success: false, message: "Error generating PDF" });
   }
 });
 

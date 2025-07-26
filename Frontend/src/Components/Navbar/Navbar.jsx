@@ -1,10 +1,8 @@
-import "./Navbar.css";
-import logo from "../Assets/logo.png";
-import cart_icon from "../Assets/cart_icon.png";
-import { useContext, useRef, useState, useEffect } from "react";
+import React, { useContext, useRef, useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import HomeContext from "../../Context/HomeContext";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaChevronDown, FaChevronUp, FaUser } from "react-icons/fa";
+import "./Navbar.css";
 
 const Navbar = () => {
   const [menu, setMenu] = useState("Home");
@@ -13,6 +11,7 @@ const Navbar = () => {
   const [activeSuggestion, setActiveSuggestion] = useState(0);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [submenuOpen, setSubmenuOpen] = useState(null);
 
   const {
     getTotalItemsInCart,
@@ -98,6 +97,14 @@ const Navbar = () => {
     setMenuOpen(!menuOpen);
   };
 
+  const toggleSubmenu = (menuItem) => {
+    if (submenuOpen === menuItem) {
+      setSubmenuOpen(null);
+    } else {
+      setSubmenuOpen(menuItem);
+    }
+  };
+
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -115,43 +122,14 @@ const Navbar = () => {
   return (
     <div className="navbar">
       <div className="nav-logo">
-        <img src={logo} alt="logo" className="logo" />
+        <div className="logo-placeholder">GS</div>
         <div className="logo-text">
-          <span className="primary">GadgetStore</span>
-          <span className="secondary">
+          <span className="logo-title">GadgetStore</span>
+          <span className="logo-subtitle">
             AI Assisted Electronics And Gadgets Store
           </span>
         </div>
       </div>
-
-      <button
-        className={`menu-toggle ${menuOpen ? "active" : ""}`}
-        onClick={toggleMenu}
-        aria-label="Toggle menu"
-      >
-        <span className="menu-icon"></span>
-      </button>
-
-      <ul ref={menuref} className={`nav-menu ${menuOpen ? "active" : ""}`}>
-        {["Home", "Electronics", "Gadgets", "Accessories"].map((item) => (
-          <li key={item}>
-            <Link
-              to={`/${item === "Home" ? "" : item}`}
-              className="nav-link"
-              onClick={() => {
-                setMenu(item);
-                setMenuOpen(false);
-                if (item === "Home") {
-                  navigate("/", { replace: true });
-                }
-              }}
-            >
-              {item === "Electronics" ? "Household Appliances" : item}
-              {menu === item && <hr />}
-            </Link>
-          </li>
-        ))}
-      </ul>
 
       <div className="nav-actions">
         <div className="search-container">
@@ -198,7 +176,84 @@ const Navbar = () => {
             </div>
           )}
         </div>
+      </div>
 
+      <button
+        className={`menu-toggle ${menuOpen ? "active" : ""}`}
+        onClick={toggleMenu}
+        aria-label="Toggle menu"
+      >
+        <span className="menu-icon"></span>
+      </button>
+
+      <ul ref={menuref} className={`nav-menu ${menuOpen ? "active" : ""}`}>
+        {["Home", "Electronics", "Gadgets", "Accessories"].map((item) => (
+          <li
+            key={item}
+            className="nav-menu-item"
+            onMouseEnter={() => toggleSubmenu(item)}
+            onMouseLeave={() => setSubmenuOpen(null)}
+          >
+            <Link
+              to={`/${item === "Home" ? "" : item}`}
+              className={`nav-link ${menu === item ? "active" : ""}`}
+              onClick={() => {
+                setMenu(item);
+                setMenuOpen(false);
+                if (item === "Home") {
+                  navigate("/", { replace: true });
+                }
+              }}
+            >
+              {item === "Electronics" ? "Household Appliances" : item}
+              {item !== "Home" && (
+                <span className="dropdown-icon">
+                  {submenuOpen === item ? <FaChevronUp /> : <FaChevronDown />}
+                </span>
+              )}
+            </Link>
+
+            {item !== "Home" && submenuOpen === item && (
+              <div className="submenu">
+                <div className="submenu-content">
+                  <h4>Popular {item}</h4>
+                  <div className="submenu-items">
+                    {products
+                      .filter(
+                        (p) => p.category.toLowerCase() === item.toLowerCase()
+                      )
+                      .slice(0, 4)
+                      .map((product) => (
+                        <Link
+                          key={product.id}
+                          to={`/product/${product.id}`}
+                          className="submenu-item"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <div className="submenu-product">
+                            <div className="submenu-img-placeholder"></div>
+                            <div className="submenu-product-name">
+                              {product.name}
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                  </div>
+                  <Link
+                    to={`/${item}`}
+                    className="view-all"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    View All {item} →
+                  </Link>
+                </div>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <div className="nav-user-actions">
         {isLoggedIn ? (
           <div
             className="profile-dropdown-wrapper"
@@ -206,10 +261,29 @@ const Navbar = () => {
             onMouseLeave={() => setShowProfileDropdown(false)}
           >
             <div className="profile-icon" title="Profile">
-              <span>{user?.email?.[0]?.toUpperCase() || "U"}</span>
+              <FaUser className="user-icon" />
+              <span className="profile-initial">
+                {user?.email?.[0]?.toUpperCase() || "U"}
+              </span>
             </div>
             {showProfileDropdown && (
               <div className="profile-dropdown">
+                <div className="profile-info">
+                  <div className="profile-avatar">
+                    <span>{user?.email?.[0]?.toUpperCase() || "U"}</span>
+                  </div>
+                  <div className="profile-details">
+                    <div className="profile-name">
+                      {user?.name || user?.email || "User"}
+                    </div>
+                    <div className="profile-email">
+                      {user?.email || "user@example.com"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="dropdown-divider"></div>
+
                 {isAdmin ? (
                   <div
                     className="dropdown-item"
@@ -218,7 +292,8 @@ const Navbar = () => {
                       setShowProfileDropdown(false);
                     }}
                   >
-                    🛠 Admin Dashboard
+                    <div className="dropdown-icon">🛠</div>
+                    Admin Dashboard
                   </div>
                 ) : (
                   <div
@@ -228,10 +303,13 @@ const Navbar = () => {
                       setShowProfileDropdown(false);
                     }}
                   >
-                    👤 Your Profile
+                    <div className="dropdown-icon">👤</div>
+                    Your Profile
                   </div>
                 )}
+
                 <div className="dropdown-divider"></div>
+
                 <div
                   className="dropdown-item logout"
                   onClick={() => {
@@ -240,7 +318,8 @@ const Navbar = () => {
                     setShowProfileDropdown(false);
                   }}
                 >
-                  🚪 Logout
+                  <div className="dropdown-icon">🚪</div>
+                  Logout
                 </div>
               </div>
             )}
@@ -252,10 +331,14 @@ const Navbar = () => {
         )}
 
         <div className="cart-icon-wrapper">
-          <Link to="/cart">
-            <img src={cart_icon} alt="cart" className="cart-icon" />
+          <Link to="/cart" className="cart-link">
+            <div className="cart-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+              </svg>
+            </div>
+            <div className="cart-badge">{getTotalItemsInCart()}</div>
           </Link>
-          <div className="cart-badge">{getTotalItemsInCart()}</div>
         </div>
       </div>
     </div>

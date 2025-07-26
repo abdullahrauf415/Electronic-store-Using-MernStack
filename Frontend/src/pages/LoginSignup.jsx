@@ -60,14 +60,12 @@ const LoginSignup = () => {
       setLoading(false);
 
       if (response.data?.success && response.data.token) {
-        // Save token and isAdmin flag to localStorage
         localStorage.setItem("token", response.data.token);
         localStorage.setItem(
           "isAdmin",
           response.data.isAdmin ? "true" : "false"
         );
 
-        // Update context user state
         await loginUser(
           response.data.token,
           response.data.email,
@@ -102,7 +100,14 @@ const LoginSignup = () => {
     <div className="loginSignup">
       <div className="loginSignup-container">
         <h1>{isSignup ? "Sign Up" : "Log In"}</h1>
-        <form className="loginSignup-form" onSubmit={(e) => e.preventDefault()}>
+
+        <form
+          className="loginSignup-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLoginSignup();
+          }}
+        >
           {isSignup && (
             <input
               type="text"
@@ -157,12 +162,7 @@ const LoginSignup = () => {
             </div>
           )}
 
-          <button
-            type="button"
-            className="signup-button"
-            onClick={handleLoginSignup}
-            disabled={loading}
-          >
+          <button type="submit" className="signup-button" disabled={loading}>
             {loading
               ? isSignup
                 ? "Creating Account..."

@@ -12,6 +12,8 @@ import AddProduct from "../Components/AddProduct/AddProduct";
 import ListProduct from "../Components/ListProduct/ListProduct";
 import OrderHistory from "../Components/OrderHistory/OrderHistory";
 import FaqManager from "../Components/FaqManager/FaqManager";
+import AdminSocialMedia from "../Components/AdminSocialMedia/AdminSocialMedia";
+import AdminQuickLinks from "../Components/AdminQuickLinks/AdminQuickLinks";
 
 const Admin = () => {
   const location = useLocation();
@@ -39,6 +41,8 @@ const Admin = () => {
           <Route path="ListProduct" element={<ListProduct />} />
           <Route path="OrderHistory" element={<OrderHistory />} />
           <Route path="FaqManager" element={<FaqManager />} />
+          <Route path="AdminSocialMedia" element={<AdminSocialMedia />} />
+          <Route path="AdminQuickLinks" element={<AdminQuickLinks />} />
           <Route path="*" element={<div>Page Not Found</div>} />
         </Routes>
       </div>
@@ -82,6 +86,20 @@ const WelcomeMessage = () => {
           <p>Manage frequently asked questions and answers</p>
           <Link to="FaqManager" className="access-button">
             Go to FAQ Manager →
+          </Link>
+        </div>
+        <div className="access-card">
+          <h2>Social Media Links</h2>
+          <p>Manage your social media presence and links</p>
+          <Link to="AdminSocialMedia" className="access-button">
+            Go to Social Media Manager →
+          </Link>
+        </div>
+        <div className="access-card">
+          <h2>Quick Links</h2>
+          <p>Manage Quick links</p>
+          <Link to="AdminQuickLinks" className="access-button">
+            Go to Quick Links
           </Link>
         </div>
       </div>

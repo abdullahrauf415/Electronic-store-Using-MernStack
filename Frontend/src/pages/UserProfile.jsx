@@ -10,6 +10,8 @@ const UserProfile = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [orderToRemove, setOrderToRemove] = useState(null);
 
   useEffect(() => {
     if (!user?.token) {
@@ -48,6 +50,55 @@ const UserProfile = () => {
     fetchOrders();
   }, [user]);
 
+  const ConfirmModal = ({ show, onConfirm, onCancel }) => {
+    if (!show) return null;
+
+    return (
+      <div className="confirmation-modal">
+        <div className="modal-content">
+          <h3>Confirm Removal</h3>
+          <p>Are you sure you want to remove this order?</p>
+          <div className="modal-actions">
+            <button className="confirm-btn" onClick={onConfirm}>
+              Yes, Remove
+            </button>
+            <button className="cancel-btn" onClick={onCancel}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const handleRemoveClick = (orderId) => {
+    setOrderToRemove(orderId);
+    setShowConfirm(true);
+  };
+
+  const removeOrder = async () => {
+    if (!orderToRemove) return;
+
+    try {
+      const response = await axios.delete(
+        `http://localhost:3000/remove-order/${orderToRemove}`,
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+
+      if (response.data.success) {
+        setOrders(orders.filter((order) => order.orderId !== orderToRemove));
+      } else {
+        alert(response.data.message || "Failed to remove order");
+      }
+    } catch (err) {
+      console.error("Order removal error:", err);
+      alert(err.response?.data?.message || "Error removing order");
+    } finally {
+      setShowConfirm(false);
+      setOrderToRemove(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="user-profile-container">
@@ -64,28 +115,14 @@ const UserProfile = () => {
     );
   }
 
-  const removeOrder = async (orderId) => {
-    if (!window.confirm("Are you sure you want to remove this order?")) return;
-
-    try {
-      const response = await axios.delete(
-        `http://localhost:3000/remove-order/${orderId}`,
-        { headers: { Authorization: `Bearer ${user.token}` } }
-      );
-
-      if (response.data.success) {
-        setOrders(orders.filter((order) => order.orderId !== orderId));
-      } else {
-        alert(response.data.message || "Failed to remove order");
-      }
-    } catch (err) {
-      console.error("Order removal error:", err);
-      alert(err.response?.data?.message || "Error removing order");
-    }
-  };
-
   return (
     <div className="user-profile-container">
+      <ConfirmModal
+        show={showConfirm}
+        onConfirm={removeOrder}
+        onCancel={() => setShowConfirm(false)}
+      />
+
       <h1>Your Profile</h1>
 
       <section className="profile-section">
@@ -223,7 +260,7 @@ const UserProfile = () => {
                   <td>
                     <button
                       className="remove-order-btn"
-                      onClick={() => removeOrder(order.orderId)}
+                      onClick={() => handleRemoveClick(order.orderId)}
                       disabled={["Shipped", "Delivered"].includes(order.status)}
                       title={
                         ["Shipped", "Delivered"].includes(order.status)

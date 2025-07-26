@@ -5,6 +5,7 @@ import { extractFAQTextFromPDF } from "../Utils/extractPDFText.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import ChatMessage from "../Models/ChatMessage.js";
+import { consumeFaqCacheDirty } from "../cache/faqCache.js";
 // import { verifyToken } from "../Middleware/verifyToken.js"; // Optional: protect route with user auth
 
 const __filename = fileURLToPath(import.meta.url);
@@ -64,14 +65,26 @@ router.post("/chat", async (req, res) => {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
-You are a helpful assistant for an electronics store.
-Use only this FAQ data to answer questions:
+You are a smart AI assistant for an online electronics store called "SmartTech Hub". 
+Your job is to help customers with:
+
+1. Answering product-related questions (phones, laptops, accessories, etc.)
+2. Recommending gadgets based on user's budget, brand, or usage (like gaming, photography, student work).
+3. Explaining features in simple language.
+4. Providing clear answers to store FAQs like payment, delivery, and return policy.
+
+Use this FAQ content as your trusted source:
 ${cachedContextData}
-If the question can't be answered with this data, say:
-"I can only answer questions about our store policies and products from our FAQ."
+
+Important Rules:
+- Do NOT make up answers. If the data is not available, say:
+  "I'm here to assist with electronics and store-related questions based on our FAQ. You can contact support for detailed help."
+- Be friendly, helpful, and clear.
+- Use short paragraphs, no overly long responses.
 
 User Question: ${query}
-    `;
+Assistant:
+`;
 
     const result = await model.generateContent(prompt);
     const botReply = await result.response.text();
