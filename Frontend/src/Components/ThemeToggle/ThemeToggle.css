@@ -1,0 +1,48 @@
+.theme-toggle-btn {
+  position: fixed;
+  bottom: 1rem;
+  left: 1.5rem;
+  z-index: 10000;
+
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: var(--theme-toggle-bg, #2563eb);
+  color: white;
+  font-size: 22px;
+
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--theme-toggle-hover, #1e40af);
+  transform: scale(1.05);
+}
+
+.theme-toggle-btn:focus {
+  outline: 2px solid rgba(66, 153, 225, 0.6);
+  outline-offset: 3px;
+}
+
+.theme-toggle-btn i {
+  transition: transform 0.5s ease;
+}
+
+.theme-toggle-btn:hover i {
+  transform: rotate(360deg);
+}
+
+/* Dark mode-specific styles */
+.theme-toggle-btn.dark {
+  --theme-toggle-bg: #f59e0b;
+  --theme-toggle-hover: #d97706;
+  color: black;
+}

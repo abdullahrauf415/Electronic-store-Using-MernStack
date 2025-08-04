@@ -114,7 +114,7 @@
   padding: 10px 15px;
   cursor: pointer;
   border-bottom: 1px solid #eee;
-  font-size: 14px;
+  font-size: 7px;
   display: flex;
   align-items: center;
   transition: background-color 0.2s;
@@ -162,6 +162,14 @@
   position: relative;
 }
 
+.profile-dropdown-wrapper:hover .profile-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+
 .profile-icon {
   position: relative;
   width: 50px;
@@ -172,11 +180,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 1s;
 }
 
 .profile-icon:hover {
   background: #dee2e6;
+  transition-duration: 1s;
 }
 
 .user-icon {
@@ -203,6 +212,11 @@
   box-shadow: 0 5px 15px rgba(0,0,0,0.08);
   z-index: 100;
   padding: 15px 0;
+    opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+  pointer-events: none;
+  transition: all 0.2s ease;
 }
 
 .profile-info {
@@ -493,60 +507,52 @@
   color: #0056b3;
   text-decoration: underline;
 }
+.profile-email {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
 
 @media (max-width: 992px) {
   .navbar {
-    padding: 12px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px 20px;
   }
-  
-  .nav-actions {
-    order: 3;
-    width: 100%;
-    margin: 15px 0 0 0;
-    min-width: unset;
-    max-width: unset;
-  }
-  
-  .nav-user-actions {
-    justify-content: flex-start;
-    order: 2;
-    flex: unset;
-    margin-left: auto;
-  }
-  
+
   .menu-toggle {
     display: block;
     order: 1;
+    margin-left: auto;
   }
-  
+
   .nav-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: white;
     flex-direction: column;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    width: 100%;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease;
+    border-top: 1px solid #ddd;
+    margin-top: 10px;
+    background-color: white;
   }
-  
+
   .nav-menu.active {
     max-height: 500px;
-    border-top: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
   }
-  
+
   .nav-menu-item {
     width: 100%;
     border-bottom: 1px solid #eee;
   }
-  
+
   .nav-link {
     padding: 12px 20px;
+    width: 100%;
   }
-  
+
   .submenu {
     position: static;
     width: 100%;
@@ -556,21 +562,30 @@
     padding: 0;
     border-radius: 0;
   }
-  
-  .nav-menu-item:hover .submenu {
-    display: none;
-  }
-  
+
   .submenu.active {
     display: block;
   }
-  
+
   .submenu-content {
     padding: 0 20px 15px;
   }
-  
+
   .submenu-items {
     grid-template-columns: 1fr;
+  }
+
+  .nav-actions {
+    width: 100%;
+    order: 3;
+    margin: 15px 0;
+  }
+
+  .nav-user-actions {
+    width: 100%;
+    justify-content: flex-start;
+    order: 2;
+    margin-top: 10px;
   }
 }
 
@@ -578,26 +593,215 @@
   .navbar {
     padding: 10px 15px;
   }
-  
-  .nav-logo {
-    min-width: auto;
-  }
-  
+
   .logo-placeholder {
-    padding: 8px 12px;
+    padding: 6px 10px;
     font-size: 18px;
   }
-  
+
   .logo-title {
     font-size: 16px;
   }
-  
+
   .logo-subtitle {
-    font-size: 10px;
+    font-size: 11px;
   }
-  
+
   .auth-button {
     padding: 6px 12px;
     font-size: 13px;
   }
+
+  .nav-search {
+    padding: 8px 12px;
+  }
+
+  .search-icon-button {
+    padding: 0 10px;
+  }
+
+  .cart-icon,
+  .profile-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cart-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+}
+/* === Dark Theme Support for Navbar === */
+.dark-theme .navbar {
+  background-color: #1f2937;
+  border-bottom: 1px solid #374151;
+}
+
+.dark-theme .logo-placeholder {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.dark-theme .logo-title {
+  color: #ffffff;
+}
+
+.dark-theme .logo-subtitle {
+  color: #9ca3af;
+}
+
+.dark-theme .nav-link {
+  color: #e5e7eb;
+}
+
+.dark-theme .nav-link:hover,
+.dark-theme .nav-link.active {
+  color: #3b82f6;
+}
+
+.dark-theme .nav-link.active::after {
+  background: #3b82f6;
+}
+
+.dark-theme .dropdown-icon {
+  color: #9ca3af;
+}
+
+.dark-theme .submenu {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark-theme .submenu-product {
+  color: #f3f4f6;
+}
+
+.dark-theme .submenu-product:hover {
+  background: #374151;
+}
+
+.dark-theme .view-all {
+  color: #60a5fa;
+}
+
+.dark-theme .view-all:hover {
+  color: #3b82f6;
+}
+
+.dark-theme .search-input-wrapper {
+  background: #111827;
+  border-color: #374151;
+  box-shadow: none;
+}
+
+.dark-theme .nav-search {
+  background-color: transparent;
+  color: #f9fafb;
+}
+
+.dark-theme .nav-search::placeholder {
+  color: #9ca3af;
+}
+
+.dark-theme .search-icon-button {
+  background-color: #2563eb;
+}
+
+.dark-theme .search-icon-button:hover {
+  background-color: #1d4ed8;
+}
+
+.dark-theme .suggestions-dropdown {
+  background: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .suggestion-item {
+  color: #d1d5db;
+  border-bottom: 1px solid #374151;
+}
+
+.dark-theme .suggestion-item:hover,
+.dark-theme .suggestion-item.active {
+  background-color: #374151;
+}
+
+.dark-theme .no-results {
+  color: #9ca3af;
+}
+
+.dark-theme .auth-button {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.dark-theme .auth-button:hover {
+  background: #1d4ed8;
+}
+
+.dark-theme .profile-icon,
+.dark-theme .cart-icon {
+  background-color: #374151;
+}
+
+.dark-theme .profile-icon:hover,
+.dark-theme .cart-icon:hover {
+  background-color: #4b5563;
+}
+
+.dark-theme .user-icon {
+  color: #d1d5db;
+}
+
+.dark-theme .profile-initial {
+  color: #e5e7eb;
+}
+
+.dark-theme .profile-dropdown {
+  background-color: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.08);
+}
+
+.dark-theme .profile-name {
+  color: #f9fafb;
+}
+
+.dark-theme .profile-email {
+  color: #9ca3af;
+}
+
+.dark-theme .dropdown-divider {
+  background: #374151;
+}
+
+.dark-theme .dropdown-item {
+  color: #d1d5db;
+}
+
+.dark-theme .dropdown-item:hover {
+  background-color: #374151;
+}
+
+.dark-theme .dropdown-item.logout {
+  color: #f87171;
+}
+
+.dark-theme .submenu h4 {
+  color: #f3f4f6;
+}
+
+.dark-theme .submenu-item {
+  color: #e5e7eb;
+}
+
+.dark-theme .submenu-item:hover {
+  background-color: #374151;
+}
+
+.dark-theme .menu-icon,
+.dark-theme .menu-icon::before,
+.dark-theme .menu-icon::after {
+  background-color: #e5e7eb;
 }

@@ -90,3 +90,22 @@
     font-size: 1rem;
   }
 }
+/* === Dark Theme Support === */
+.dark-theme .hero-wrapper {
+  background-color: #0f172a;
+}
+
+.dark-theme .hero-card {
+  background-color: #1e293b;
+  color: #f1f5f9;
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .hero-btn {
+  background-color: #f1f5f9;
+  color: #1e293b;
+}
+
+.dark-theme .hero-btn:hover {
+  background-color: #cbd5e1;
+}

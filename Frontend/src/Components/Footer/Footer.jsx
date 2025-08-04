@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Footer.css";
 import {
   FaChevronDown,
@@ -22,24 +22,22 @@ const Footer = () => {
   const [quickLinks, setQuickLinks] = useState([]);
   const [activeQuickLink, setActiveQuickLink] = useState(null);
   const [loading, setLoading] = useState(true);
+  const modalRef = useRef(null);
 
   // Fetch data from backend
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch FAQs
         const faqResponse = await fetch("/api/faqs");
         const faqData = await faqResponse.json();
         if (faqData.success) setFaqs(faqData.faqs);
 
-        // Fetch social media links
         const socialResponse = await fetch(
           "http://localhost:3000/social-media-links"
         );
         const socialData = await socialResponse.json();
         if (socialData.success) setSocialLinks(socialData.links);
 
-        // Fetch quick links
         const quickLinksResponse = await fetch(
           "http://localhost:3000/quick-links"
         );
@@ -54,6 +52,23 @@ const Footer = () => {
 
     fetchData();
   }, []);
+
+  // Close modal on outside click
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        setActiveQuickLink(null);
+      }
+    };
+
+    if (activeQuickLink) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [activeQuickLink]);
 
   const handleDownloadPdf = async () => {
     try {
@@ -192,20 +207,21 @@ const Footer = () => {
             <div className="payment-method">Visa</div>
             <div className="payment-method">MasterCard</div>
             <div className="payment-method">Cash on delivery</div>
+            <div className="payment-method">Bank Transfer</div>
+            <div className="payment-method">EasyPaisa</div>
+            <div className="payment-method">JazzCash</div>
           </div>
         </div>
       </div>
 
       <div className="footer-bottom">
-        <div className="footer-copyright">
-          <p>© {new Date().getFullYear()} GadgetStore. All rights reserved.</p>
-        </div>
+        <p>© {new Date().getFullYear()} GadgetStore. All rights reserved.</p>
       </div>
 
       {/* Quick Link Modal */}
       {activeQuickLink && (
         <div className="quicklink-modal">
-          <div className="modal-content">
+          <div className="modal-content" ref={modalRef}>
             <button
               className="close-modal"
               onClick={() => setActiveQuickLink(null)}

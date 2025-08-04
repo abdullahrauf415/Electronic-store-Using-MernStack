@@ -441,3 +441,117 @@
     font-size: 1.25rem;
   }
 }
+/* === Dark Theme Support === */
+.dark-theme .list-product-container {
+  background-color: #1a202c;
+}
+
+.dark-theme .page-title {
+  color: #f7fafc;
+}
+
+.dark-theme .search-input {
+  background-color: #2d3748;
+  color: #f7fafc;
+  border-color: #4a5568;
+}
+
+.dark-theme .search-input::placeholder {
+  color: #a0aec0;
+}
+
+.dark-theme .search-button {
+  background: #5a67d8;
+}
+
+.dark-theme .search-button:hover {
+  background: #434190;
+}
+
+.dark-theme .product-card {
+  background-color: #2d3748;
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .product-name {
+  color: #edf2f7;
+}
+
+.dark-theme .product-description {
+  color: #cbd5e0;
+}
+
+.dark-theme .current-price {
+  color: #68d391;
+}
+
+.dark-theme .original-price {
+  color: #718096;
+}
+
+.dark-theme .size-pill {
+  background: #4a5568;
+  color: #edf2f7;
+}
+
+.dark-theme .availability-badge.in-stock {
+  background-color: #38a169;
+}
+
+.dark-theme .availability-badge.out-of-stock {
+  background-color: #e53e3e;
+}
+
+.dark-theme .edit-button {
+  background: #ecc94b;
+  color: #1a202c;
+}
+
+.dark-theme .delete-button {
+  background: #e53e3e;
+}
+
+.dark-theme .availability-button {
+  background-color: #4c51bf;
+  color: #f7fafc;
+}
+
+.dark-theme .availability-button.out-of-stock {
+  background-color: #faf089;
+  color: #2d3748;
+}
+
+.dark-theme .edit-modal {
+  background-color: #2d3748;
+  color: #f7fafc;
+}
+
+.dark-theme .modal-header {
+  border-bottom-color: #4a5568;
+}
+
+.dark-theme .close-button {
+  color: #a0aec0;
+}
+
+.dark-theme .input-field,
+.dark-theme .textarea-field {
+  background-color: #4a5568;
+  color: #edf2f7;
+  border-color: #718096;
+}
+
+.dark-theme .save-button {
+  background: #48bb78;
+  color: #fff;
+}
+
+.dark-theme .cancel-button {
+  background: #718096;
+  color: #edf2f7;
+}
+
+.dark-theme .image-preview button {
+  background: rgba(255, 255, 255, 0.6);
+  color: #1a202c;
+}

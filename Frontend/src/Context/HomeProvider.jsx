@@ -9,7 +9,12 @@ const HomeProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
-
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme
+      ? savedTheme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
   const logout = useCallback(() => {
     localStorage.removeItem("token");
     setUser(null);
@@ -30,7 +35,15 @@ const HomeProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        setUser({ email: data.email, token });
+        // Log to ensure name is received
+        console.log("Verified user data:", data);
+
+        setUser({
+          email: data.email,
+          token,
+          name: data.name || "", // ✅ Ensure name is set here
+        });
+
         setIsAdmin(data.isAdmin || false);
 
         const cartRes = await axios.get("http://localhost:3000/get-cart", {
@@ -93,11 +106,9 @@ const HomeProvider = ({ children }) => {
     [user, logout]
   );
 
-  // Add this inside your HomeProvider component
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (Object.keys(cartItems).length > 0) {
-        // Use sendBeacon for reliable synchronization
         const data = JSON.stringify(cartItems);
         navigator.sendBeacon(
           "http://localhost:3000/update-cart",
@@ -157,9 +168,9 @@ const HomeProvider = ({ children }) => {
     });
   };
 
-  const loginUser = async (token, email, isAdminFlag = false) => {
+  const loginUser = async (token, email, isAdminFlag = false, name = "") => {
     localStorage.setItem("token", token);
-    setUser({ token, email });
+    setUser({ token, email, name }); // ✅ Include name here
     setIsAdmin(isAdminFlag);
 
     try {
@@ -195,7 +206,6 @@ const HomeProvider = ({ children }) => {
 
   const clearCart = async () => {
     setCartItems({});
-
     if (user?.token) {
       try {
         await axios.post(
@@ -227,6 +237,23 @@ const HomeProvider = ({ children }) => {
     getTotalItemsInCart();
   }, [cartItems, getTotalItemsInCart]);
 
+  //toggle dark mode
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  useEffect(() => {
+    // Update localStorage when theme changes
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+
+    // Update body class for theme
+    if (darkMode) {
+      document.body.classList.add("dark-theme");
+    } else {
+      document.body.classList.remove("dark-theme");
+    }
+  }, [darkMode]);
+
   return (
     <HomeContext.Provider
       value={{
@@ -246,6 +273,8 @@ const HomeProvider = ({ children }) => {
         logout,
         loading,
         fetchCategoryProducts,
+        darkMode,
+        toggleDarkMode,
       }}
     >
       {!loading && !productsLoading && children}

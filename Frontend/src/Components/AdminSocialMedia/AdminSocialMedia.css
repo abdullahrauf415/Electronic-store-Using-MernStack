@@ -300,3 +300,146 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* ===================== DARK THEME: ADMIN SOCIAL MEDIA ===================== */
+.dark-theme .admin-social-media {
+  background-color: #1e1e2f;
+  color: #eaeaea;
+}
+
+.dark-theme .admin-social-media .header {
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.dark-theme .admin-social-media h2,
+.dark-theme .form-container h3,
+.dark-theme .platform {
+  color: #ffffff;
+}
+
+.dark-theme .add-btn {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.dark-theme .add-btn:hover {
+  background-color: #2980b9;
+}
+
+.dark-theme .add-btn:disabled {
+  background-color: #555;
+  color: #ccc;
+}
+
+.dark-theme .error-message {
+  background-color: #330000;
+  color: #ff6b6b;
+  border-left-color: #ff6b6b;
+}
+
+.dark-theme .form-container,
+.dark-theme .no-links,
+.dark-theme .link-card {
+  background-color: #2a2a3c;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .form-group label {
+  color: #ccc;
+}
+
+.dark-theme .form-group input,
+.dark-theme .form-group select {
+  background-color: #2e2e3e;
+  color: #e2e2e2;
+  border: 1px solid #444c66;
+}
+
+.dark-theme .form-group input:focus,
+.dark-theme .form-group select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.dark-theme .form-group small {
+  color: #a0a0a0;
+}
+
+.dark-theme .save-btn {
+  background-color: #20c997;
+  color: #fff;
+}
+
+.dark-theme .save-btn:hover {
+  background-color: #17b38a;
+}
+
+.dark-theme .cancel-btn {
+  background-color: #fa5252;
+  color: #fff;
+}
+
+.dark-theme .cancel-btn:hover {
+  background-color: #e03131;
+}
+
+.dark-theme .link-card {
+  border-left: 4px solid #3498db;
+}
+
+.dark-theme .link-card.editing {
+  background-color: #1d1d30;
+  border: 2px solid #3498db;
+}
+
+.dark-theme .editing-indicator {
+  background-color: #3498db;
+  color: white;
+}
+
+.dark-theme .link-icon {
+  color: #91c6f7;
+}
+
+.dark-theme .url {
+  color: #4dabf7;
+}
+
+.dark-theme .url:hover {
+  text-decoration: underline;
+}
+
+.dark-theme .content-preview {
+  color: #adb5bd;
+}
+
+.dark-theme .edit-btn {
+  color: #4dabf7;
+}
+
+.dark-theme .edit-btn:hover {
+  background-color: #1a1a2b;
+}
+
+.dark-theme .delete-btn {
+  color: #fa5252;
+}
+
+.dark-theme .delete-btn:hover {
+  background-color: #2a1a1a;
+}
+
+.dark-theme .admin-restricted {
+  background-color: #403d26;
+  border-color: #ffec99;
+}
+
+.dark-theme .admin-restricted h2,
+.dark-theme .admin-restricted p {
+  color: #ffdd57;
+}
+
+.dark-theme .loading-spinner {
+  border-color: #444;
+  border-top-color: #4dabf7;
+}

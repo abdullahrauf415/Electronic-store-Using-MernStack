@@ -565,3 +565,150 @@
 .confirm-delete-btn:hover {
   background: #c0392b;
 }
+/* =================== DARK THEME FOR ORDER HISTORY =================== */
+.dark-theme .order-history-container {
+  background-color: #1e1e2f;
+  color: #e0e0e0;
+}
+
+.dark-theme .order-history-title {
+  color: #ffffff;
+}
+
+.dark-theme .order-history-title::after {
+  background: #3b82f6;
+}
+
+.dark-theme .error-message {
+  background-color: #3a1d1d;
+  color: #ff6b6b;
+  border-left-color: #ff6b6b;
+}
+
+.dark-theme .admin-restricted {
+  background-color: #2b2b3d;
+  border: 1px solid #fbc02d;
+}
+
+.dark-theme .admin-restricted p,
+.dark-theme .restricted-icon {
+  color: #ffb300;
+}
+
+.dark-theme .filters-container {
+  background: #2c2c3e;
+  box-shadow: none;
+}
+
+.dark-theme .search-filter input,
+.dark-theme .status-filter select,
+.dark-theme .status-controls select {
+  background-color: #3b3b4f;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+.dark-theme .search-filter input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.dark-theme .stat-card {
+  background: #2d2d3d;
+  box-shadow: none;
+}
+
+.dark-theme .stat-label {
+  color: #aaa;
+}
+
+.dark-theme .order-grid .no-orders {
+  background-color: #2d2d3d;
+  color: #bbb;
+  box-shadow: none;
+}
+
+.dark-theme .order-card {
+  background-color: #2a2a3a;
+  box-shadow: none;
+}
+
+.dark-theme .order-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .order-header,
+.dark-theme .order-footer {
+  background-color: #262636;
+  border-color: #444;
+}
+
+.dark-theme .order-id strong,
+.dark-theme .user-name strong,
+.dark-theme .order-date strong,
+.dark-theme .order-total strong {
+  color: #ffffff;
+}
+
+.dark-theme .user-email a {
+  color: #3b82f6;
+}
+
+.dark-theme .user-email a:hover {
+  color: #60a5fa;
+}
+
+.dark-theme .order-details {
+  border-top-color: #555;
+}
+
+.dark-theme .order-items li {
+  color: #ccc;
+  border-bottom-color: #444;
+}
+
+.dark-theme .status-text.pending,
+.dark-theme .status-text.shipped,
+.dark-theme .status-text.delivered,
+.dark-theme .status-text.cancelled {
+  opacity: 0.9;
+}
+
+.dark-theme .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.dark-theme .delete-modal {
+  background-color: #2b2b3d;
+  color: #eee;
+}
+
+.dark-theme .modal-header {
+  background: #c0392b;
+}
+
+.dark-theme .modal-content p {
+  color: #ccc;
+}
+
+.dark-theme .warning-text {
+  background: #4a1e1e;
+  color: #ff6b6b;
+}
+
+.dark-theme .cancel-btn {
+  background-color: #3b3b4f;
+  color: #ccc;
+}
+
+.dark-theme .cancel-btn:hover {
+  background-color: #555;
+}
+
+.dark-theme .confirm-delete-btn {
+  background-color: #c0392b;
+}
+
+.dark-theme .confirm-delete-btn:hover {
+  background-color: #a93226;
+}

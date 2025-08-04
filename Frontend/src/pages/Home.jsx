@@ -2,6 +2,8 @@ import React, { useRef } from "react";
 import Hero from "../Components/Hero/Hero";
 import Popular from "../Components/Popular/Popular";
 import NewArrival from "../Components/NewArrival/NewArrival";
+import SuggestedProducts from "../Components/SuggestedProducts/SuggestedProducts";
+import "./CSS/Home.css";
 
 const Home = () => {
   const newArrivalRef = useRef(null);
@@ -11,12 +13,17 @@ const Home = () => {
   };
 
   return (
-    <div>
+    <div className="home-page">
       <Hero onShopClick={scrollToNewArrival} />
-      <Popular />
-      <div ref={newArrivalRef}>
+      <section className="home-section">
+        <SuggestedProducts />
+      </section>
+      <section className="home-section">
+        <Popular />
+      </section>
+      <section className="home-section" ref={newArrivalRef}>
         <NewArrival />
-      </div>
+      </section>
     </div>
   );
 };

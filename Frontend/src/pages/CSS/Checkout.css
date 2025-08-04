@@ -221,3 +221,88 @@
     font-size: 0.95rem;
   }
 }
+.dark-theme .checkout-card {
+  background: #1e1e2f;
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .checkout-card::before {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+}
+
+.dark-theme .checkout-title {
+  color: #f1f5f9;
+}
+
+.dark-theme .checkout-title::after {
+  background: #818cf8;
+}
+
+.dark-theme .order-card,
+.dark-theme .address-card {
+  background: #2a2e45;
+  border-color: #3b3f5c;
+}
+
+.dark-theme .order-card:hover,
+.dark-theme .address-card:hover {
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .order-card h3,
+.dark-theme .address-card h3 {
+  color: #e2e8f0;
+}
+
+.dark-theme .price-row {
+  color: #cbd5e1;
+  border-bottom: 1px dashed #3b3f5c;
+}
+
+.dark-theme .total {
+  color: #ffffff;
+  border-top: 2px solid #3b3f5c;
+}
+
+.dark-theme .checkout-input,
+.dark-theme .checkout-textarea {
+  background: #1f2233;
+  color: #e2e8f0;
+  border-color: #3b3f5c;
+}
+
+.dark-theme .checkout-input:focus,
+.dark-theme .checkout-textarea:focus {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.15);
+}
+
+.dark-theme .error-text {
+  color: #f87171;
+}
+
+.dark-theme .map-select-btn {
+  background: linear-gradient(45deg, #6366f1, #8b5cf6);
+  color: white;
+}
+
+.dark-theme .map-select-btn:hover {
+  box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+}
+
+.dark-theme .back-link {
+  color: #a78bfa;
+}
+
+.dark-theme .back-link:hover {
+  color: #c084fc;
+}
+
+.dark-theme .checkout-button {
+  background: linear-gradient(45deg, #10b981, #34d399);
+  color: white;
+}
+
+.dark-theme .checkout-button:hover {
+  box-shadow: 0 7px 20px rgba(16, 185, 129, 0.3);
+}

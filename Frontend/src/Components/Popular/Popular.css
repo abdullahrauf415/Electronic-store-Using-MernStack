@@ -91,3 +91,20 @@
     padding: 15px 5px;
   }
 }
+/* =================== DARK THEME FOR POPULAR SECTION =================== */
+.dark-theme .popular {
+  background-color: #1e1e2f;
+  color: #e0e0e0;
+}
+
+.dark-theme .popular h1 {
+  color: #ffffff;
+}
+
+.dark-theme .popular hr {
+  background-color: #3b82f6;
+}
+
+.dark-theme .popular-item {
+  background-color: transparent;
+}

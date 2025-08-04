@@ -204,3 +204,39 @@
   width: 50px;
   height: 16px;
 }
+/* === Dark Theme Support === */
+.dark-theme .item {
+  background-color: #1e293b;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .item-name {
+  color: #f1f5f9;
+}
+
+.dark-theme .item-price-new {
+  color: #60a5fa; /* Light blue */
+}
+
+.dark-theme .item-price-old {
+  color: #94a3b8; /* Muted slate */
+}
+
+.dark-theme .item-discount {
+  background: linear-gradient(135deg, #f87171, #fb923c);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .item.skeleton {
+  background-color: #2d3748;
+}
+
+.dark-theme .item.skeleton .item-image,
+.dark-theme .item.skeleton .item-name,
+.dark-theme .item.skeleton .item-price-new,
+.dark-theme .item.skeleton .item-price-old {
+  background-color: #4b5563;
+}
+.dark-theme .item.skeleton .item-name {
+  width: 90%;
+}

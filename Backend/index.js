@@ -8,13 +8,19 @@ import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import Users from "./Models/user.js";
+import Review from "./Models/review.js";
+import SocialMediaLink from "./Models/SocialMediaLink.js";
+import QuickLink from "./Models/quickLink.js";
+import "./Models/product.js";
+import Product from "./Models/product.js";
 import generateFaqPDFRoute from "./Routes/generateFaqPDFRoute.js";
-import geminiChatRoute from "./Routes/geminiChat.js";
 import faqRoute from "./Routes/faqRoute.js";
 import dotenv from "dotenv";
+import chatbotRoute from "./Routes/chatbotRoute.js";
 
 //load environment variables
-dotenv.config;
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -93,25 +99,6 @@ app.post("/upload", upload.single("product"), (req, res) => {
     success: true,
     image_url: `http://localhost:${port}/images/${req.file.filename}`,
   });
-});
-
-// Product schema
-const Product = mongoose.model("Product", {
-  id: Number,
-  name: String,
-  description: String,
-  image: [String],
-  category: String,
-  size: [
-    {
-      size: String,
-      new_price: Number,
-      old_price: Number,
-    },
-  ],
-  color: [String],
-  date: { type: Date, default: Date.now },
-  available: { type: Boolean, default: true },
 });
 
 // Add product - admin only
@@ -241,25 +228,6 @@ app.put("/toggle-availability/:id", verifyAdmin, async (req, res) => {
   }
 });
 
-// User schema
-const Users = mongoose.model("Users", {
-  name: String,
-  email: { type: String, unique: true },
-  password: String,
-  cartData: Object,
-  isAdmin: { type: Boolean, default: false },
-  orders: [
-    {
-      orderId: String,
-      items: [String],
-      total: Number,
-      date: { type: Date, default: Date.now },
-      status: { type: String, default: "Pending" },
-    },
-  ],
-  date: { type: Date, default: Date.now },
-});
-
 // Create admin
 async function createAdminUser() {
   try {
@@ -362,6 +330,7 @@ app.get("/verify-token", async (req, res) => {
       success: true,
       message: "Token is valid",
       email: user.email,
+      name: user.name,
       isAdmin: user.isAdmin,
     });
   } catch {
@@ -606,16 +575,6 @@ app.get("/popularitems", async (req, res) => {
   res.send(popularitems);
 });
 
-// Review schema
-const Review = mongoose.model("Review", {
-  productId: Number,
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
-  userName: String,
-  rating: { type: Number, min: 1, max: 5 },
-  comment: String,
-  date: { type: Date, default: Date.now },
-});
-
 // Verify Token Middleware
 const verifyToken = async (req, res, next) => {
   try {
@@ -780,14 +739,6 @@ app.delete("/delete-review/:reviewId", verifyToken, async (req, res) => {
       .json({ success: false, message: "Failed to delete review" });
   }
 });
-// Social Media Links schema
-const SocialMediaLink = mongoose.model("SocialMediaLink", {
-  platform: { type: String, required: true, unique: true },
-  url: { type: String, required: true },
-  icon: String, // Optional icon field
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
 // Get all social media links
 app.get("/social-media-links", async (req, res) => {
   try {
@@ -910,14 +861,7 @@ app.delete("/social-media-links/:id", verifyAdmin, async (req, res) => {
     });
   }
 });
-// Quick Link Schema
-const QuickLink = mongoose.model("QuickLink", {
-  title: { type: String, required: true },
-  content: { type: String, required: true },
-  icon: String,
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
+
 // Get all quick links
 app.get("/quick-links", async (req, res) => {
   try {
@@ -1036,8 +980,8 @@ app.delete("/quick-links/:id", verifyAdmin, async (req, res) => {
 });
 // Use the routes
 app.use("/api", generateFaqPDFRoute);
-app.use("/api", geminiChatRoute);
 app.use("/api", faqRoute);
+app.use("/api", chatbotRoute);
 
 // Start server
 app.listen(port, (error) => {

@@ -1,8 +1,22 @@
 import mongoose from "mongoose";
+
 const productSchema = new mongoose.Schema({
+  id: Number,
   name: String,
-  price: Number,
   description: String,
+  image: [String],
+  category: String,
+  size: [
+    {
+      size: String,
+      new_price: Number,
+      old_price: Number,
+    },
+  ],
+  color: [String],
+  date: { type: Date, default: Date.now },
+  available: { type: Boolean, default: true },
 });
-export default mongoose.model("Product", productSchema);
-// This code defines a Mongoose schema for products, which includes fields for the product name, price, and description.
+
+const Product = mongoose.model("Product", productSchema);
+export default Product;

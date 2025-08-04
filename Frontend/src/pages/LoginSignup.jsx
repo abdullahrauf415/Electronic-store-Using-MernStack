@@ -24,15 +24,40 @@ const LoginSignup = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const getPasswordValidationMessage = () => {
+    const { password } = form;
+    if (!password) return "";
+
+    const errors = [];
+    if (password.length < 8) errors.push("at least 8 characters");
+    if (!/[A-Z]/.test(password)) errors.push("one uppercase letter");
+    if (!/[^a-zA-Z0-9]/.test(password)) errors.push("one special character");
+
+    if (errors.length === 0) return "✅ Password is strong";
+    return `❌ Include ${errors.join(", ")}`;
+  };
+
   const validateForm = () => {
     if (!form.email || !form.password || (isSignup && !form.name)) {
       alert("Please fill in all required fields.");
       return false;
     }
-    if (isSignup && !agree) {
-      alert("Please agree to the Terms of Service and Privacy Policy.");
-      return false;
+
+    if (isSignup) {
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/;
+      if (!passwordRegex.test(form.password)) {
+        alert(
+          "Password must be at least 8 characters long, include one uppercase letter, and one special character."
+        );
+        return false;
+      }
+
+      if (!agree) {
+        alert("Please agree to the Terms of Service and Privacy Policy.");
+        return false;
+      }
     }
+
     return true;
   };
 
@@ -69,7 +94,8 @@ const LoginSignup = () => {
         await loginUser(
           response.data.token,
           response.data.email,
-          response.data.isAdmin
+          response.data.isAdmin,
+          response.data.name
         );
         navigate("/");
       } else {
@@ -146,6 +172,18 @@ const LoginSignup = () => {
               {showPassword ? "🙈" : "👁️"}
             </button>
           </div>
+
+          {isSignup && form.password && (
+            <p
+              className={`password-validation-message ${
+                getPasswordValidationMessage().startsWith("✅")
+                  ? "valid"
+                  : "invalid"
+              }`}
+            >
+              {getPasswordValidationMessage()}
+            </p>
+          )}
 
           {isSignup && (
             <div className="checkbox-container">

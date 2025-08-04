@@ -120,6 +120,18 @@
   cursor: pointer;
   font-weight: 500;
 }
+.password-validation-message {
+  font-size: 0.85rem;
+  margin: 5px 0 10px;
+}
+
+.password-validation-message.valid {
+  color: green;
+}
+
+.password-validation-message.invalid {
+  color: red;
+}
 
 /* Responsive styles */
 @media (max-width: 500px) {
@@ -138,4 +150,61 @@
   .loginSignup-form {
     gap: 0.8rem;
   }
+}
+/*drak mode styles*/
+.dark-theme .loginSignup-container {
+  background-color: #1f1f2e;
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .loginSignup-container h1 {
+  color: #f1f5f9;
+}
+
+.dark-theme .loginSignup-form input[type="text"],
+.dark-theme .loginSignup-form input[type="email"],
+.dark-theme .loginSignup-form input[type="password"] {
+  background-color: #2a2e3b;
+  color: #f1f5f9;
+  border-color: #3a3f55;
+}
+
+.dark-theme .loginSignup-form input:focus {
+  border-color: #66b2ff;
+}
+
+.dark-theme .password-toggle {
+  color: #cbd5e1;
+}
+
+.dark-theme .checkbox-container {
+  color: #cbd5e1;
+}
+
+.dark-theme .checkbox-container label span {
+  color: #66b2ff;
+}
+
+.dark-theme .signup-button {
+  background-color: #2563eb;
+}
+
+.dark-theme .signup-button:hover {
+  background-color: #1e40af;
+}
+
+.dark-theme .loginsignup-toggle {
+  color: #cbd5e1;
+}
+
+.dark-theme .loginsignup-toggle span {
+  color: #66b2ff;
+}
+
+.dark-theme .password-validation-message.valid {
+  color: #22c55e;
+}
+
+.dark-theme .password-validation-message.invalid {
+  color: #ef4444;
 }

@@ -214,3 +214,103 @@
   animation: spin 0.6s linear infinite;
   margin-right: 8px;
 }
+/* === Dark Theme Overrides for Review / Description Box === */
+.dark-theme .description-box {
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+.dark-theme .description-navigator {
+  border-bottom-color: #374151;
+}
+
+.dark-theme .description-nav-box {
+  color: #cbd5e1;
+}
+
+.dark-theme .description-nav-box.active {
+  background: #111827;
+  border-bottom-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.dark-theme .description-nav-box.fade {
+  color: #9ca3af;
+  background: #1e293b;
+}
+
+.dark-theme .descriptionbox-description {
+  background: #111827;
+  color: #e5e7eb;
+}
+
+.dark-theme .review-input-container {
+  background: #1e293b;
+}
+
+.dark-theme .review-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.dark-theme .review-input:disabled {
+  background: #1f2937;
+  color: #9ca3af;
+}
+
+.dark-theme .submit-review-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.dark-theme .submit-review-btn:hover {
+  background: #1d4ed8;
+}
+
+.dark-theme .submit-review-btn:disabled {
+  background: #4b5563;
+  color: #cbd5e1;
+}
+
+.dark-theme .user-review {
+  background: #0f172a;
+  color: #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.dark-theme .review-date,
+.dark-theme .rating-text {
+  color: #94a3b8;
+}
+
+.dark-theme .review-comment {
+  color: #e2e8f0;
+}
+
+.dark-theme .no-reviews {
+  color: #9ca3af;
+}
+
+.dark-theme .error-message {
+  background: #7f1d1d;
+  color: #fee2e2;
+  border-color: #dc2626;
+}
+
+.dark-theme .delete-review-btn {
+  background: #1f2937;
+  border-color: #334155;
+  color: #f87171;
+}
+
+.dark-theme .delete-review-btn:hover {
+  background: #7f1d1d;
+  border-color: #dc2626;
+  color: white;
+}
+
+.dark-theme .spinner {
+  border-color: #60a5fa;
+  border-top-color: transparent;
+}

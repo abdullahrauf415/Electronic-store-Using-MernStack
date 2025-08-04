@@ -92,3 +92,32 @@
   margin-right: 10px;
   color: #555;
 }
+/* ===================== DARK THEME: SIDEBAR ===================== */
+.dark-theme .sidebar {
+  background: linear-gradient(180deg, #1f1f2f, #121212);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.dark-theme .sidebar-item {
+  background-color: #2a2a3b;
+  color: #e9ecef;
+}
+
+.dark-theme .sidebar-item:hover,
+.dark-theme .sidebar-item.active {
+  background-color: #3a3af5;
+  color: #ffffff;
+}
+
+.dark-theme .sidebar-item img {
+  filter: brightness(0.85) contrast(1.2);
+}
+
+.dark-theme .sidebar-item:hover img,
+.dark-theme .sidebar-item.active img {
+  filter: brightness(0) invert(1);
+}
+
+.dark-theme .sidebar-icon {
+  color: #ccc;
+}

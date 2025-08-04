@@ -97,3 +97,15 @@
     height: 3px;
   }
 }
+/* === Dark Theme for New Arrivals Section === */
+.dark-theme .new-arrival h1 {
+  color: #f3f4f6; /* Light heading in dark mode */
+}
+
+.dark-theme .new-arrival hr {
+  background: #3b82f6; /* Use a bright accent for the line */
+}
+
+.dark-theme .new-arrival {
+  background-color: transparent; /* Optional: keep section background clean */
+}

@@ -253,3 +253,113 @@
     gap: 5px;
   }
 }
+/* === Dark Theme Support === */
+.dark-theme .faq-manager {
+  background-color: #1f2937;
+  color: #e5e7eb;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.dark-theme .manager-title,
+.dark-theme .form-title,
+.dark-theme .list-title {
+  color: #f8fafc;
+}
+
+.dark-theme .faq-form,
+.dark-theme .faq-list-container {
+  background-color: #111827;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .input-label {
+  color: #cbd5e1;
+}
+
+.dark-theme .input-field,
+.dark-theme .textarea-field {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark-theme .input-field:focus,
+.dark-theme .textarea-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.dark-theme .submit-btn {
+  background-color: #2563eb;
+}
+
+.dark-theme .submit-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.dark-theme .cancel-btn {
+  background-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.dark-theme .cancel-btn:hover {
+  background-color: #374151;
+}
+
+.dark-theme .toggle-all-btn {
+  background-color: #0ea5e9;
+}
+
+.dark-theme .toggle-all-btn:hover {
+  background-color: #0284c7;
+}
+
+.dark-theme .accordion-item {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.dark-theme .accordion-header {
+  background-color: #27364b;
+  color: #f1f5f9;
+}
+
+.dark-theme .accordion-question {
+  color: #e2e8f0;
+}
+
+.dark-theme .answer-text {
+  color: #cbd5e1;
+}
+
+.dark-theme .edit-btn {
+  background-color: #22c55e;
+}
+
+.dark-theme .edit-btn:hover {
+  background-color: #16a34a;
+}
+
+.dark-theme .delete-btn {
+  background-color: #ef4444;
+}
+
+.dark-theme .delete-btn:hover {
+  background-color: #b91c1c;
+}
+
+.dark-theme .empty-state {
+  color: #94a3b8;
+  border-color: #475569;
+  background-color: #0f172a;
+}
+
+.dark-theme .error-message {
+  color: #f87171;
+  background: #7f1d1d;
+}
+
+.dark-theme .loading-spinner {
+  border-color: #334155;
+  border-top-color: #3b82f6;
+}

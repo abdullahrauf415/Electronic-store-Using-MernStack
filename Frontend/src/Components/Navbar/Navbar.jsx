@@ -260,10 +260,24 @@ const Navbar = () => {
             onMouseEnter={() => setShowProfileDropdown(true)}
             onMouseLeave={() => setShowProfileDropdown(false)}
           >
-            <div className="profile-icon" title="Profile">
+            <div
+              className="profile-icon"
+              tabIndex={0}
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              onBlur={() => setShowProfileDropdown(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setShowProfileDropdown(!showProfileDropdown);
+                }
+              }}
+              aria-haspopup="true"
+              aria-expanded={showProfileDropdown}
+              role="button"
+              title="Profile"
+            >
               <FaUser className="user-icon" />
               <span className="profile-initial">
-                {user?.email?.[0]?.toUpperCase() || "U"}
+                {user?.name?.[0]?.toUpperCase() || "U"}
               </span>
             </div>
             {showProfileDropdown && (
@@ -273,9 +287,10 @@ const Navbar = () => {
                     <span>{user?.email?.[0]?.toUpperCase() || "U"}</span>
                   </div>
                   <div className="profile-details">
-                    <div className="profile-name">
-                      {user?.name || user?.email || "User"}
-                    </div>
+                    <span className="profile-initial">
+                      {user && user.name ? user.name[0].toUpperCase() : "U"}
+                    </span>
+                    <div className="profile-name">{user?.name || "User"}</div>
                     <div className="profile-email">
                       {user?.email || "user@example.com"}
                     </div>

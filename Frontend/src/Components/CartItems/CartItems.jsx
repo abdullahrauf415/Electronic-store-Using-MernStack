@@ -1,8 +1,8 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./CartItems.css";
 import HomeContext from "../../Context/HomeContext";
 import remove_icon from "../Assets/cart_cross_icon.png";
+import "./CartItems.css";
 
 const CartItems = () => {
   const {
@@ -12,8 +12,15 @@ const CartItems = () => {
     removeFromCart,
     isLoggedIn,
   } = useContext(HomeContext);
+
   const navigate = useNavigate();
+  const [isRemoving, setIsRemoving] = useState(null);
   const isCartEmpty = Object.keys(cartItems).length === 0;
+
+  // Calculate delivery charges
+  const deliveryCharge = getTotalCartAmount() > 100000 ? 0 : 200;
+  const totalAmount = getTotalCartAmount() + deliveryCharge;
+
   const handleProceed = () => {
     if (!isLoggedIn) {
       navigate("/login");
@@ -22,110 +29,163 @@ const CartItems = () => {
     }
   };
 
+  const handleRemove = (key) => {
+    setIsRemoving(key);
+    setTimeout(() => {
+      removeFromCart(key);
+      setIsRemoving(null);
+    }, 500);
+  };
+
   return (
-    <div className="cart-items">
-      <div className="cartitem-format-main">
-        <p>Product</p>
-        <p>Title</p>
-        <p>Variant</p>
-        <p>Price</p>
-        <p>Quantity</p>
-        <p>Total</p>
-        <p>Remove</p>
-      </div>
-      <hr />
-
-      {isCartEmpty ? (
-        <p className="cart-empty-message">Your cart is empty.</p>
-      ) : (
-        Object.entries(cartItems).map(([key, cartItem]) => {
-          const product = products.find((p) => p.id === cartItem.id);
-          if (!product) return null;
-          const uniqueKey = `${cartItem.id}-${cartItem.size}-${cartItem.color}`;
-          return (
-            <div key={uniqueKey} className="cartitem-format">
-              <div className="cartitem-field">
-                <span className="value">
-                  <img
-                    src={product.image[0]}
-                    alt={product.name}
-                    className="carticon-product-icon"
-                  />
-                </span>
-              </div>
-              <div className="cartitem-field">
-                <span className="value">{product.name}</span>
-              </div>
-              <div className="cartitem-field">
-                <span className="value variant">
-                  {cartItem.size && (
-                    <span className="variant-badge size">{cartItem.size}</span>
-                  )}
-                  {cartItem.color && (
-                    <span className="variant-badge color">
-                      {cartItem.color}
-                    </span>
-                  )}
-                </span>
-              </div>
-              <div className="cartitem-field">
-                <span className="value">Rs.{cartItem.price}</span>
-              </div>
-              <div className="cartitem-field">
-                <span className="value">
-                  <button className="cartitems-quantity">
-                    {cartItem.quantity}
-                  </button>
-                </span>
-              </div>
-              <div className="cartitem-field">
-                <span className="value">
-                  Rs.{cartItem.price * cartItem.quantity}
-                </span>
-              </div>
-              <div className="cartitem-field">
-                <span className="value">
-                  <img
-                    src={remove_icon}
-                    alt="Remove"
-                    className="cart-items-remove"
-                    onClick={() => removeFromCart(key)}
-                  />
-                </span>
-              </div>
-            </div>
-          );
-        })
-      )}
-
-      <div className="cartitems-down">
-        <div className="cartitems-down-total">
-          <h1>Cart Total</h1>
-          <div>
-            <div className="cart-item-total-item">
-              <p>Subtotal</p>
-              <p>Rs.{getTotalCartAmount()}</p>
-            </div>
-            <hr />
-            <div className="cart-item-total-item">
-              <p>Shipping Fee</p>
-              <p>Free</p>
-            </div>
-            <hr />
-            <div className="cart-item-total-item">
-              <h3>Total</h3>
-              <h3>Rs.{getTotalCartAmount()}</h3>
-            </div>
-            <button
-              onClick={handleProceed}
-              disabled={isCartEmpty}
-              className={!isLoggedIn ? "disabled-btn , pointer" : ""}
-            >
-              {isLoggedIn ? "Proceed to Checkout" : "Login to Checkout"}
-            </button>
-          </div>
+    <div className="cart-container">
+      <div className="cart-header">
+        <h1>Shopping Cart</h1>
+        <div className="cart-steps">
+          <div className="cart-step active">Cart</div>
+          <div className="cart-step">Delivery</div>
+          <div className="cart-step">Payment</div>
         </div>
       </div>
+
+      <div className="cart-items">
+        <div className="cart-grid-header">
+          <div className="cart-header-item">Product</div>
+          <div className="cart-header-item">Title</div>
+          <div className="cart-header-item">Variant</div>
+          <div className="cart-header-item">Price</div>
+          <div className="cart-header-item">Quantity</div>
+          <div className="cart-header-item">Total</div>
+          <div className="cart-header-item">Remove</div>
+        </div>
+        <hr className="cart-divider" />
+
+        {isCartEmpty ? (
+          <div className="cart-empty">
+            <div className="empty-cart-icon">🛒</div>
+            <h2>Your cart is empty</h2>
+            <p>Looks like you haven't added anything to your cart yet</p>
+            <button onClick={() => navigate("/")} className="shop-btn">
+              Continue Shopping
+            </button>
+          </div>
+        ) : (
+          Object.entries(cartItems).map(([key, cartItem]) => {
+            const product = products.find((p) => p.id === cartItem.id);
+            if (!product) return null;
+            const uniqueKey = `${cartItem.id}-${cartItem.size}-${cartItem.color}`;
+
+            return (
+              <div
+                key={uniqueKey}
+                className={`cart-item ${isRemoving === key ? "removing" : ""}`}
+              >
+                <div className="cart-item-cell">
+                  <div className="cart-product-image">
+                    <img
+                      src={product.image[0]}
+                      alt={product.name}
+                      className="product-thumbnail"
+                    />
+                  </div>
+                </div>
+
+                <div className="cart-item-cell">
+                  <div className="cart-product-name">{product.name}</div>
+                </div>
+
+                <div className="cart-item-cell">
+                  <div className="cart-variants">
+                    {cartItem.size && (
+                      <span className="variant-tag size">{cartItem.size}</span>
+                    )}
+                    {cartItem.color && (
+                      <span className="variant-tag color">
+                        {cartItem.color}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="cart-item-cell">
+                  <div className="cart-price">
+                    Rs.{cartItem.price.toLocaleString()}
+                  </div>
+                </div>
+
+                <div className="cart-item-cell">
+                  <div className="cart-quantity">
+                    <span className="quantity-badge">{cartItem.quantity}</span>
+                  </div>
+                </div>
+
+                <div className="cart-item-cell">
+                  <div className="cart-total">
+                    Rs.{(cartItem.price * cartItem.quantity).toLocaleString()}
+                  </div>
+                </div>
+
+                <div className="cart-item-cell">
+                  <div
+                    className="cart-remove"
+                    onClick={() => handleRemove(key)}
+                  >
+                    <img
+                      src={remove_icon}
+                      alt="Remove"
+                      className="remove-icon"
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {!isCartEmpty && (
+        <div className="cart-summary">
+          <div className="summary-card">
+            <h2>Order Summary</h2>
+
+            <div className="summary-row">
+              <span>Subtotal</span>
+              <span>Rs.{getTotalCartAmount().toLocaleString()}</span>
+            </div>
+
+            <div className="summary-row">
+              <span>Delivery Fee</span>
+              <span className={deliveryCharge === 0 ? "free-delivery" : ""}>
+                {deliveryCharge === 0 ? "FREE" : `Rs.${deliveryCharge}`}
+              </span>
+            </div>
+
+            {deliveryCharge === 0 && (
+              <div className="delivery-message">
+                🎉 Free delivery on orders over Rs.100,000
+              </div>
+            )}
+
+            <div className="summary-row total-row">
+              <span>Total</span>
+              <span>Rs.{totalAmount.toLocaleString()}</span>
+            </div>
+
+            <button
+              onClick={handleProceed}
+              className={`checkout-btn ${!isLoggedIn ? "login-prompt" : ""}`}
+            >
+              {isLoggedIn ? "Proceed to Checkout" : "Login to Checkout"}
+              <span className="arrow">→</span>
+            </button>
+
+            <div className="secure-checkout">
+              <div className="lock-icon">🔒</div>
+              <span>Secure Checkout</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

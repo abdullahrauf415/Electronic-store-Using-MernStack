@@ -49,3 +49,13 @@
     height: 10px;
   }
 }
+
+.dark-theme .breadcrums {
+  background: linear-gradient(to right, #2c2c2c, #1e1e1e);
+  color: #dddddd;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .breadcrums img {
+  filter: brightness(0) invert(1);
+}

@@ -5,3 +5,128 @@
   box-sizing: border-box;
   font-family: poppins, sans-serif;
 }
+/* === CSS Variables (Light Theme) === */
+:root {
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --background: #f8f9fa;
+  --surface: #ffffff;
+  --text: #212529;
+  --text-muted: #6c757d;
+  --border: #dee2e6;
+  --card: #ffffff;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --link: #0d6efd;
+}
+
+/* === Dark Theme Overrides === */
+.dark-theme {
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --background: #121212;
+  --surface: #1e1e1e;
+  --text: #f1f1f1;
+  --text-muted: #9ca3af;
+  --border: #2a2a2a;
+  --card: #1f1f1f;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: #f87171;
+  --link: #60a5fa;
+}
+
+/* === Reset & Base === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  line-height: 1.6;
+  scroll-behavior: smooth;
+  min-height: 100vh;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* === Link Styling === */
+a {
+  color: var(--link);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
+/* === Buttons === */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* === Inputs === */
+input,
+textarea,
+select {
+  font-family: inherit;
+  background-color: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* === Headings === */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* === Utilities === */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* === Scrollbar (Webkit) === */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 8px;
+}
+
+/* === Transitions === */
+.transition-theme {
+  transition: all 0.3s ease-in-out;
+}

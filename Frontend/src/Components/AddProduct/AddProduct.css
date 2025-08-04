@@ -224,3 +224,68 @@ input:focus, select:focus, textarea:focus {
     font-size: 0.9rem;
   }
 }
+/* ===================== DARK THEME: ADD PRODUCT ===================== */
+.dark-theme .add-product-container {
+  background-color: #1e1e2f;
+  color: #eaeaea;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .form-title {
+  color: #f8f9fa;
+}
+
+.dark-theme label {
+  color: #cbd5e0;
+}
+
+.dark-theme input,
+.dark-theme select,
+.dark-theme textarea {
+  background-color: #2c2f48;
+  color: #f1f3f5;
+  border: 1px solid #444c66;
+}
+
+.dark-theme input:focus,
+.dark-theme select:focus,
+.dark-theme textarea:focus {
+  border-color: #3a3af5;
+  box-shadow: 0 0 0 2px rgba(58, 58, 245, 0.3);
+}
+
+.dark-theme .image-upload-container {
+  border-color: #4a4e69;
+  background-color: #2a2d40;
+  color: #adb5bd;
+}
+
+.dark-theme .upload-content {
+  color: #ced4da;
+}
+
+.dark-theme .remove-size {
+  background: #e03131;
+}
+
+.dark-theme .add-size {
+  background: #20c997;
+}
+
+.dark-theme .image-preview img {
+  filter: brightness(0.9);
+}
+
+.dark-theme .remove-image {
+  background: rgba(255, 255, 255, 0.2);
+  color: #f8f9fa;
+}
+
+.dark-theme .submit-btn {
+  background-color: #3a3af5;
+  color: #fff;
+}
+
+.dark-theme .submit-btn:hover {
+  background-color: #2b2bd9;
+}

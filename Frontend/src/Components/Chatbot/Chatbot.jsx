@@ -1,348 +1,359 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import axios from "axios";
+import {
+  FaRobot,
+  FaPaperPlane,
+  FaTrash,
+  FaTimes,
+  FaComment,
+  FaExternalLinkAlt,
+} from "react-icons/fa";
+import HomeContext from "../../Context/HomeContext";
 import "./ChatBot.css";
 
-const Chatbot = () => {
+const ChatBot = () => {
+  const { user } = useContext(HomeContext);
   const [isOpen, setIsOpen] = useState(false);
-  const [chats, setChats] = useState([
-    {
-      id: "1",
-      title: "Welcome Chat",
-      messages: [{ text: "Hello! How can I help you today?", fromUser: false }],
-    },
-  ]);
-  const [currentChatId, setCurrentChatId] = useState("1");
-  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [chatHistoryList, setChatHistoryList] = useState([]);
+  const [selectedChatId, setSelectedChatId] = useState(null);
+  const [inputText, setInputText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const messagesEndRef = useRef(null);
 
-  // Get current chat
-  const currentChat = chats.find((chat) => chat.id === currentChatId);
-  const messages = currentChat ? currentChat.messages : [];
+  useEffect(() => {
+    if (isOpen && user?.token) {
+      fetchChatHistory();
+    } else {
+      setMessages([]);
+    }
+  }, [isOpen, user]);
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
-  const startNewChat = () => {
-    const newChatId = Date.now().toString();
-    const newChat = {
-      id: newChatId,
-      title: "New Chat",
-      messages: [
-        { text: "Hello! What can I help you with today?", fromUser: false },
-      ],
+  // Function to detect and format URLs
+  const formatMessageWithLinks = (text) => {
+    if (!text) return text;
+
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="message-link"
+          >
+            {part} <FaExternalLinkAlt className="link-icon" />
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
+  const fetchChatHistory = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/chat-history",
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      );
+
+      const fullChat = [];
+      const historyList = [];
+      const seenIds = new Set(); // Track seen IDs to prevent duplicates
+
+      response.data.forEach((msg) => {
+        // Skip duplicate messages
+        if (seenIds.has(msg._id)) return;
+        seenIds.add(msg._id);
+
+        fullChat.push({
+          _id: msg._id,
+          text: msg.message,
+          sender: "user",
+          timestamp: msg.timestamp,
+        });
+
+        if (msg.reply) {
+          fullChat.push({
+            _id: `bot-${msg._id}`,
+            text: msg.reply,
+            sender: "bot",
+            timestamp: new Date(msg.timestamp).getTime() + 1000,
+          });
+        }
+
+        historyList.push({
+          _id: msg._id,
+          text: msg.message,
+          timestamp: msg.timestamp,
+        });
+      });
+
+      setMessages(fullChat);
+      setChatHistoryList(historyList.reverse());
+    } catch (err) {
+      console.error("Chat history fetch error:", err);
+      setError("Failed to load chat history.");
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputText.trim() || isLoading || !user) return;
+
+    const tempId = `temp-${Date.now()}`;
+    const newUserMsg = {
+      _id: tempId,
+      text: inputText,
+      sender: "user",
+      timestamp: new Date(),
+      isTemp: true,
     };
 
-    setChats([newChat, ...chats]);
-    setCurrentChatId(newChatId);
+    setMessages((prev) => [...prev, newUserMsg]);
+    setInputText("");
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/chatbot",
+        { message: inputText },
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+
+      const botReply = {
+        _id: `bot-${response.data.messageId}`,
+        text: response.data.reply,
+        sender: "bot",
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [
+        ...prev.filter((msg) => msg._id !== tempId),
+        { ...newUserMsg, _id: response.data.messageId, isTemp: false },
+        botReply,
+      ]);
+
+      fetchChatHistory();
+    } catch (err) {
+      console.error("Chat send error:", err);
+      setError("Failed to get response.");
+      setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const deleteChat = (id, e) => {
-    e.stopPropagation();
-    if (chats.length === 1) {
-      startNewChat();
-    }
-
-    const updatedChats = chats.filter((chat) => chat.id !== id);
-    setChats(updatedChats);
-
-    if (id === currentChatId && updatedChats.length > 0) {
-      setCurrentChatId(updatedChats[0].id);
+  const handleDeleteMessage = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/chat-messages/${id}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setMessages((prev) =>
+        prev.filter((msg) => msg._id !== id && msg._id !== `bot-${id}`)
+      );
+      fetchChatHistory();
+    } catch (err) {
+      console.error("Delete message error:", err);
+      setError("Failed to delete message.");
     }
   };
 
-  const sendMessage = () => {
-    if (input.trim() === "") return;
-
-    // Update chat title if it's the first user message
-    const updatedChats = chats.map((chat) => {
-      if (chat.id === currentChatId) {
-        const isFirstUserMessage = chat.messages.length === 1;
-
-        return {
-          ...chat,
-          title: isFirstUserMessage
-            ? input.substring(0, 20) + (input.length > 20 ? "..." : "")
-            : chat.title,
-          messages: [
-            ...chat.messages,
-            { text: input, fromUser: true },
-            {
-              text: "Thanks for your message! I'm a demo chatbot. In a real implementation, I would provide helpful responses.",
-              fromUser: false,
-            },
-          ],
-        };
-      }
-      return chat;
-    });
-
-    setChats(updatedChats);
-    setInput("");
+  const handleClearChat = async () => {
+    try {
+      await axios.delete("http://localhost:3000/api/chat-messages", {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setMessages([]);
+      setChatHistoryList([]);
+    } catch (err) {
+      console.error("Clear chat error:", err);
+      setError("Failed to clear chat.");
+    }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      sendMessage();
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
-  // Scroll to bottom of messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const handleSelectPastMessage = (id) => {
+    setSelectedChatId(id);
+    const selected = messages.filter(
+      (msg) => msg._id === id || msg._id === `bot-${id}`
+    );
+    setMessages(selected);
+  };
+
+  const resetToLiveChat = () => {
+    setSelectedChatId(null);
+    fetchChatHistory();
+  };
+
+  if (!user) return null;
 
   return (
-    <>
-      <div className="chat-icon" onClick={toggleChat}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+    <div className={`chatbot-container ${isOpen ? "open" : ""}`}>
+      {!isOpen ? (
+        <button
+          className="chatbot-toggle"
+          onClick={() => setIsOpen(true)}
+          aria-label="Open Chat"
         >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        </svg>
-      </div>
-
-      <div className={`chatbox ${isOpen ? "open" : ""}`}>
-        <div className="chat-sidebar">
-          <div className="sidebar-header">
-            <div className="bot-avatar">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 8V4H8"></path>
-                <rect width="16" height="12" x="4" y="8" rx="2"></rect>
-                <path d="M2 14h2"></path>
-                <path d="M20 14h2"></path>
-                <path d="M15 13v2"></path>
-                <path d="M9 13v2"></path>
-              </svg>
+          <FaRobot className="chat-icon" />
+          <span className="chat-text">Chat Support</span>
+        </button>
+      ) : (
+        <div className="chatbot-window">
+          <div className="chatbot-header">
+            <div className="chatbot-title">
+              <FaRobot className="robot-icon" />
+              <div>
+                <h3>Support Assistant</h3>
+                <p>Hi {user.name?.split(" ")[0]}, how can we help?</p>
+              </div>
             </div>
-            <h3>AI Assistant</h3>
-          </div>
-
-          <button className="new-chat" onClick={startNewChat}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <button
+              className="close-btn"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close chat"
             >
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            New Chat
-          </button>
+              <FaTimes />
+            </button>
+          </div>
 
-          <div className="chat-history">
-            <div className="history-title">Recent Chats</div>
-            {chats.map((chat) => (
-              <div
-                key={chat.id}
-                className={`history-item ${
-                  currentChatId === chat.id ? "active" : ""
-                }`}
-                onClick={() => setCurrentChatId(chat.id)}
-              >
-                <div className="history-content">
-                  <div className="history-icon">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                  </div>
-                  <div className="history-text">
-                    <div className="history-title-text">{chat.title}</div>
-                    <div className="history-preview">
-                      {chat.messages.length > 1
-                        ? chat.messages[
-                            chat.messages.length - 1
-                          ].text.substring(0, 30) +
-                          (chat.messages[chat.messages.length - 1].text.length >
-                          30
-                            ? "..."
-                            : "")
-                        : "New chat"}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  className="delete-chat"
-                  onClick={(e) => deleteChat(chat.id, e)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+          <div className="chatbot-body">
+            {/* === Sidebar for Past Chats === */}
+            <div className="chatbot-sidebar">
+              <h4>Past Chats</h4>
+              <ul>
+                {chatHistoryList.slice(0, 10).map((item) => (
+                  <li
+                    key={`history-${item._id}`}
+                    className={item._id === selectedChatId ? "active" : ""}
+                    onClick={() => handleSelectPastMessage(item._id)}
                   >
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
+                    {item.text.slice(0, 30)}...
+                  </li>
+                ))}
+              </ul>
+              {selectedChatId && (
+                <button className="live-chat-btn" onClick={resetToLiveChat}>
+                  Back to Live Chat
                 </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="sidebar-footer">
-            <p>AI Assistant v1.0</p>
-          </div>
-        </div>
-
-        <div className="chat-main">
-          <div className="mobile-header">
-            <div className="mobile-header-left">
-              <div className="mobile-bot-avatar">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 8V4H8"></path>
-                  <rect width="16" height="12" x="4" y="8" rx="2"></rect>
-                  <path d="M2 14h2"></path>
-                  <path d="M20 14h2"></path>
-                  <path d="M15 13v2"></path>
-                  <path d="M9 13v2"></path>
-                </svg>
-              </div>
-              <h3>{currentChat?.title || "AI Assistant"}</h3>
+              )}
             </div>
-            <button className="close-chat" onClick={toggleChat}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
 
-          <div className="messages">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`message ${msg.fromUser ? "user" : "bot"}`}
-              >
-                <div className="message-avatar">
-                  {msg.fromUser ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 8V4H8"></path>
-                      <rect width="16" height="12" x="4" y="8" rx="2"></rect>
-                      <path d="M2 14h2"></path>
-                      <path d="M20 14h2"></path>
-                      <path d="M15 13v2"></path>
-                      <path d="M9 13v2"></path>
-                    </svg>
-                  )}
+            {/* === Main Chat Window === */}
+            <div className="chatbot-messages">
+              {messages.length === 0 && !isLoading ? (
+                <div className="empty-chat">
+                  <FaComment className="comment-icon" />
+                  <h4>Welcome to Support Chat!</h4>
+                  <p>Ask about products, orders, or store policies.</p>
                 </div>
-                <div className="message-content">{msg.text}</div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={`${msg.sender}-${msg._id}`}
+                    className={`message ${msg.sender}`}
+                  >
+                    <div className="message-content">
+                      <div className="message-text">
+                        {formatMessageWithLinks(msg.text)}
+                      </div>
+                      <div className="message-time">
+                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </div>
+                    {msg.sender === "user" &&
+                      !msg.isTemp &&
+                      !selectedChatId && (
+                        <button
+                          className="delete-btn"
+                          onClick={() => handleDeleteMessage(msg._id)}
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
+                  </div>
+                ))
+              )}
+              {isLoading && (
+                <div className="message bot">
+                  <div className="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
 
-          <div className="input-area">
-            <input
-              type="text"
-              placeholder="Type your message..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyPress}
-            />
-            <button onClick={sendMessage} disabled={input.trim() === ""}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          {/* === Input Area === */}
+          {!selectedChatId && (
+            <div className="chatbot-input-area">
+              <textarea
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message..."
+                disabled={isLoading}
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={isLoading || !inputText.trim()}
               >
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
+                <FaPaperPlane />
+              </button>
+            </div>
+          )}
+
+          {/* === Footer === */}
+          <div className="chatbot-footer">
+            <button
+              className="clear-chat-btn"
+              onClick={handleClearChat}
+              disabled={messages.length === 0}
+            >
+              Clear Chat History
             </button>
           </div>
+
+          {error && (
+            <div className="chatbot-error">
+              <p>{error}</p>
+              <button onClick={() => setError("")}>Dismiss</button>
+            </div>
+          )}
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 };
 
-export default Chatbot;
+export default ChatBot;
