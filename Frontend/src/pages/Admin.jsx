@@ -1,6 +1,5 @@
 import React from "react";
 import "./CSS/Admin.css";
-import Sidebar from "../Components/Sidebar/Sidebar";
 import {
   Routes,
   Route,
@@ -24,7 +23,6 @@ const Admin = () => {
 
   return (
     <div className="Admin">
-      <Sidebar />
       <div className="AdminContent">
         {!isWelcomePage && (
           <button

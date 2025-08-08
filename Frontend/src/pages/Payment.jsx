@@ -7,9 +7,19 @@ import "./CSS/Payment.css";
 
 const Payment = () => {
   const location = useLocation();
-  const { clearCart, products, cartItems, getTotalCartAmount } =
-    useContext(HomeContext);
-  const { name, phone, address, orderNo, amount } = location.state || {};
+  const { clearCart, products } = useContext(HomeContext);
+
+  // Extract all necessary data from location.state
+  const {
+    name,
+    phone,
+    address,
+    orderNo,
+    amount,
+    cartItems, // Added cartItems from location.state
+    totalCartAmount, // Added totalCartAmount from location.state
+  } = location.state || {};
+
   const receiptRef = useRef();
 
   // Payment method states
@@ -35,6 +45,12 @@ const Payment = () => {
   const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Store receipt data separately
+  const [receiptData, setReceiptData] = useState({
+    cartItems: {},
+    totalCartAmount: 0,
+  });
 
   // Format card number with spaces
   const formatCardNumber = (value) => {
@@ -108,6 +124,12 @@ const Payment = () => {
 
     setErrorMessage("");
     setLoading(true);
+
+    // Store receipt data before clearing cart
+    setReceiptData({
+      cartItems: { ...cartItems },
+      totalCartAmount,
+    });
 
     // Simulate payment processing
     setTimeout(() => {
@@ -220,7 +242,7 @@ const Payment = () => {
           </div>
           <hr />
 
-          {Object.entries(cartItems).map(([key, cartItem]) => {
+          {Object.entries(receiptData.cartItems).map(([key, cartItem]) => {
             const product = products.find((p) => p.id === cartItem.id);
             if (!product) return null;
 
@@ -266,7 +288,7 @@ const Payment = () => {
           <div className="confirmation-summary">
             <div className="summary-item">
               <p>Subtotal</p>
-              <p>Rs.{getTotalCartAmount()}</p>
+              <p>Rs.{receiptData.totalCartAmount}</p>
             </div>
             {paymentMethod === "cod" && (
               <div className="summary-item">

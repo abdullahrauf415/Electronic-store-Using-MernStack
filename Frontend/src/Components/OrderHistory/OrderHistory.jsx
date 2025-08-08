@@ -33,7 +33,7 @@ const OrderHistory = () => {
       try {
         setLocalLoading(true);
         const response = await axios.get(
-          "http://localhost:3000/get-all-orders/${email}",
+          "http://localhost:3000/get-all-orders",
           {
             headers: {
               Authorization: `Bearer ${user.token}`,

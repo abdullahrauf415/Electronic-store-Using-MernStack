@@ -23,6 +23,7 @@ const Navbar = () => {
   } = useContext(HomeContext);
 
   const menuref = useRef();
+  const profileRef = useRef(); // Added new ref for profile dropdown
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -108,8 +109,14 @@ const Navbar = () => {
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Mobile menu
       if (menuref.current && !menuref.current.contains(event.target)) {
         setMenuOpen(false);
+      }
+
+      // Profile dropdown
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfileDropdown(false);
       }
     };
 
@@ -257,6 +264,7 @@ const Navbar = () => {
         {isLoggedIn ? (
           <div
             className="profile-dropdown-wrapper"
+            ref={profileRef} // Added ref for profile dropdown
             onMouseEnter={() => setShowProfileDropdown(true)}
             onMouseLeave={() => setShowProfileDropdown(false)}
           >
@@ -264,7 +272,6 @@ const Navbar = () => {
               className="profile-icon"
               tabIndex={0}
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              onBlur={() => setShowProfileDropdown(false)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   setShowProfileDropdown(!showProfileDropdown);

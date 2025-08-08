@@ -44,6 +44,124 @@ const getMatchingFAQs = (faqs, message) => {
     .sort((a, b) => b.score - a.score);
 };
 
+// Map categories to keywords
+const CATEGORY_KEYWORDS = {
+  electronics: [
+    "refrigerator",
+    "fridge",
+    "washing machine",
+    "microwave",
+    "oven",
+    "blender",
+    "toaster",
+    "vacuum cleaner",
+    "air conditioner",
+    "fan",
+    "heater",
+    "iron",
+    "water purifier",
+    "juicer",
+    "mixer",
+    "dishwasher",
+    "dryer",
+    "cooker",
+    "kettle",
+    "grill",
+  ],
+  gadgets: [
+    "laptop",
+    "phone",
+    "tv",
+    "headphone",
+    "camera",
+    "watch",
+    "tablet",
+    "monitor",
+    "router",
+    "speaker",
+    "earbuds",
+    "smartphone",
+    "computer",
+  ],
+  accessories: [
+    "case",
+    "cover",
+    "charger",
+    "cable",
+    "adapter",
+    "stand",
+    "holder",
+    "protector",
+    "stylus",
+    "mount",
+    "dock",
+    "grip",
+    "strap",
+    "band",
+  ],
+};
+
+// Extract price range from message
+const extractPriceRange = (message) => {
+  const pricePatterns = [
+    {
+      regex: /(under|below|less than)\s*rs\.?\s*(\d+)/i,
+      max: (match) => parseFloat(match[2]),
+    },
+    {
+      regex: /(over|above|more than)\s*rs\.?\s*(\d+)/i,
+      min: (match) => parseFloat(match[2]),
+    },
+    {
+      regex: /between\s*rs\.?\s*(\d+)\s*and\s*rs\.?\s*(\d+)/i,
+      min: (match) => parseFloat(match[1]),
+      max: (match) => parseFloat(match[2]),
+    },
+    {
+      regex: /rs\.?\s*(\d+)\s*to\s*rs\.?\s*(\d+)/i,
+      min: (match) => parseFloat(match[1]),
+      max: (match) => parseFloat(match[2]),
+    },
+    { regex: /rs\.?\s*(\d+)/i, exact: (match) => parseFloat(match[1]) },
+  ];
+
+  for (const pattern of pricePatterns) {
+    const match = message.match(pattern.regex);
+    if (match) {
+      if (pattern.exact) {
+        const value = pattern.exact(match);
+        return { min: value, max: value };
+      }
+      const range = {};
+      if (pattern.min) range.min = pattern.min(match);
+      if (pattern.max) range.max = pattern.max(match);
+      return range;
+    }
+  }
+  return null;
+};
+
+// Extract product names from message
+const extractProductNames = (message) => {
+  const productKeywords = [
+    ...CATEGORY_KEYWORDS.electronics,
+    ...CATEGORY_KEYWORDS.gadgets,
+    ...CATEGORY_KEYWORDS.accessories,
+  ];
+
+  const foundKeywords = productKeywords.filter((keyword) =>
+    new RegExp(`\\b${keyword}s?\\b`, "i").test(message)
+  );
+
+  // Extract custom product names using pattern matching
+  const productPattern =
+    /(?:show|find|look for|search for|about|buy)\s+(.*?)(?:\s+under|\s+between|\s+over|$)/i;
+  const match = message.match(productPattern);
+  const customNames = match && match[1] ? [match[1].trim()] : [];
+
+  return [...new Set([...foundKeywords, ...customNames])];
+};
+
 // ====================== UPDATED CHATBOT ROUTE ======================== //
 router.post("/chatbot", verifyToken, async (req, res) => {
   try {
@@ -63,20 +181,28 @@ router.post("/chatbot", verifyToken, async (req, res) => {
       .join("\n");
 
     // Base prompt for Gemini
-    const basePrompt = `You are a helpful assistant for an electronics store in Pakistan. Keep responses concise (1-2 sentences max). 
+    const basePrompt = `You are GadgetBot, a helpful assistant for GadgetStore in Pakistan. Keep responses concise (1-2 sentences max). 
 Chat history:
 ${context}
 User: ${message}`;
 
-    // 1. Handle Greetings
-    if (/(hi|hello|hey|good\s(morning|afternoon|evening))/i.test(message)) {
-      reply = "Hello! How can I assist you with electronic products today?";
+    // 1. Handle Greetings - Improved greeting responses
+    if (
+      /(hi|hello|hey|good\s(morning|afternoon|evening))/i.test(lowerCaseMsg)
+    ) {
+      const greetings = [
+        "Hello! Welcome to GadgetStore. How can I assist you today?",
+        "Hi there! How can I help with your electronics needs?",
+        "Good day! What can I help you find today?",
+        "Welcome to GadgetStore! How may I assist you?",
+      ];
+      reply = greetings[Math.floor(Math.random() * greetings.length)];
     }
 
     // 2. Social Media Requests
     else if (
       /(link|social media|facebook|instagram|twitter|tiktok|connect|follow)/i.test(
-        message
+        lowerCaseMsg
       )
     ) {
       const socialLinks = await SocialMediaLink.find({});
@@ -88,12 +214,12 @@ User: ${message}`;
             .map((link) => `- ${link.platform}: ${link.url}`)
             .join("\n");
       } else {
-        reply = "Visit our store: https://electronix.com";
+        reply = "Visit our store: https://gadgetstore.com";
       }
     }
 
-    // 3. Order Status Requests
-    else if (/(order|track|status|delivery|ship)/i.test(message)) {
+    // 3. Order Status Requests - Improved order handling
+    else if (/(order|track|status|delivery|ship)/i.test(lowerCaseMsg)) {
       const orderIdMatch = message.match(/\bORD\d{4,}\b/i);
 
       if (orderIdMatch) {
@@ -105,26 +231,37 @@ User: ${message}`;
           reply = `Order ${orderId}:\n- Status: ${
             order.status
           }\n- Last update: ${order.lastUpdate.toDateString()}`;
+          if (order.status === "Shipped") {
+            reply += `\n- Tracking number: ${
+              order.trackingNumber || "Not available yet"
+            }`;
+          }
+          if (order.status === "Delivered") {
+            reply += `\n- Delivered on: ${
+              order.deliveryDate?.toDateString() ||
+              order.lastUpdate.toDateString()
+            }`;
+          }
         } else {
-          reply = `Order ${orderId} not found. Please verify your order ID.`;
+          reply = `Sorry, I couldn't find order ${orderId}. Please check your order ID and try again.`;
         }
       } else {
         reply =
-          "Please provide your Order ID (format: ORD12345) to check status.";
+          "Please provide your Order ID (format: ORD12345) so I can check your order status.";
       }
     }
 
-    // 4. FAQ & Policy Requests - PRIORITIZED ABOVE PRODUCT QUERIES
+    // 4. FAQ & Policy Requests
     else if (
       /(policy|return|refund|warranty|faq|exchange|how to|procedure)/i.test(
-        message
+        lowerCaseMsg
       )
     ) {
       const allFAQs = await Faq.find({});
 
       if (allFAQs.length === 0) {
         reply =
-          "For return assistance, please contact support@example.com or call +92-XXX-XXXXXXX.";
+          "For assistance, please contact support@gadgetstore.com or call +92-XXX-XXXXXXX.";
       } else {
         const matchingFAQs = getMatchingFAQs(allFAQs, message);
 
@@ -146,91 +283,135 @@ User: ${message}`;
             "- 14-day return window\n" +
             "- Unopened items only\n" +
             "- Proof of purchase required\n\n" +
-            "For specific cases, contact support@example.com";
+            "For specific cases, contact support@gadgetstore.com";
         }
       }
     }
 
-    // 5. Product Information Requests - UPDATED WITH HOUSEHOLD APPLIANCES
+    // 5. Product Information Requests - COMPLETELY REVISED
     else if (
-      /(product|item|device|model|specs|about|details|recommend|appliance|gadget|electronics|household)/i.test(
-        message
+      /(product|item|device|model|specs|about|details|recommend|appliance|gadget|electronics|household|price|cost|buy|purchase|available|stock)/i.test(
+        lowerCaseMsg
       )
     ) {
-      // Extract product names using keyword matching
-      const productKeywords = [
-        "laptop",
-        "phone",
-        "tv",
-        "headphone",
-        "camera",
-        "watch",
-        "tablet",
-        "monitor",
-        "router",
-        "speaker",
-        "earbuds",
-        // Household appliances
-        "refrigerator",
-        "fridge",
-        "washing machine",
-        "microwave",
-        "oven",
-        "blender",
-        "toaster",
-        "vacuum cleaner",
-        "air conditioner",
-        "fan",
-        "heater",
-        "iron",
-        "water purifier",
-        "juicer",
-        "mixer",
-        "dishwasher",
-        "dryer",
-        "cooker",
-        "kettle",
-        "grill",
-      ];
+      // Extract price range if mentioned
+      const priceRange = extractPriceRange(lowerCaseMsg);
 
-      const matchedKeywords = productKeywords.filter((kw) =>
-        new RegExp(`\\b${kw}s?\\b`, "i").test(message)
-      );
+      // Extract product names/keywords
+      const productNames = extractProductNames(lowerCaseMsg);
 
-      if (matchedKeywords.length > 0) {
-        // Find matching products
-        const products = await Product.find({
-          $or: matchedKeywords.map((kw) => ({ name: new RegExp(kw, "i") })),
-        }).limit(3);
+      // Determine category based on keywords
+      let category = null;
+      for (const [cat, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+        if (
+          keywords.some((kw) =>
+            new RegExp(`\\b${kw}s?\\b`, "i").test(lowerCaseMsg)
+          )
+        ) {
+          category = cat;
+          break;
+        }
+      }
 
-        if (products.length > 0) {
-          // Format product details with links
-          reply =
-            "Here are some options:\n" +
-            products
-              .map((p, i) => {
-                const availability = p.available
-                  ? "✅ In stock"
-                  : "❌ Currently out of stock";
-                const minPrice = Math.min(...p.size.map((s) => s.new_price));
-                // Generate product link - using slug or ID
-                const productLink = `${process.env.STORE_BASE_URL}/products/${
-                  p.slug || p._id
-                }`;
-                return `${i + 1}. ${
-                  p.name
-                } - Rs ${minPrice} (${availability})\n   View: ${productLink}`;
-              })
-              .join("\n\n");
+      // Build product query
+      const query = { available: true };
 
-          reply += "\n\nAsk about a specific product for more details!";
-        } else {
-          reply = `I couldn't find any ${matchedKeywords.join(
-            "/"
-          )} products. Would you like me to check something else?`;
+      // Add category filter if identified
+      if (category) {
+        query.category = new RegExp(category, "i");
+      }
+
+      // Add name search if products mentioned
+      if (productNames.length > 0) {
+        query.$or = productNames.map((name) => ({
+          name: new RegExp(name, "i"),
+        }));
+      }
+
+      // Add price filter if range specified
+      if (priceRange) {
+        if (priceRange.min && priceRange.max) {
+          query["size.new_price"] = {
+            $gte: priceRange.min,
+            $lte: priceRange.max,
+          };
+        } else if (priceRange.min) {
+          query["size.new_price"] = { $gte: priceRange.min };
+        } else if (priceRange.max) {
+          query["size.new_price"] = { $lte: priceRange.max };
+        }
+      }
+
+      // If no specific query, use a default
+      if (Object.keys(query).length === 1) {
+        // Only available:true
+        query.category = { $in: ["Electronics", "Gadgets", "Accessories"] };
+      }
+
+      // Find matching products
+      let products = await Product.find(query).limit(5);
+
+      if (products.length > 0) {
+        // Format product details with links
+        reply =
+          "Here are some options that match your request:\n" +
+          products
+            .map((p, i) => {
+              const availability = p.available
+                ? "✅ In stock"
+                : "❌ Out of stock";
+              const minPrice = Math.min(...p.size.map((s) => s.new_price));
+              const maxPrice = Math.max(...p.size.map((s) => s.new_price));
+              const priceRange =
+                minPrice === maxPrice
+                  ? `Rs ${minPrice}`
+                  : `Rs ${minPrice} - Rs ${maxPrice}`;
+
+              const productLink = `${process.env.STORE_BASE_URL}/products/${
+                p.slug || p._id
+              }`;
+              return `${i + 1}. ${
+                p.name
+              } - ${priceRange} (${availability})\n   View: ${productLink}`;
+            })
+            .join("\n\n");
+
+        if (products.length === 5) {
+          reply +=
+            "\n\nThere are more options available. Would you like to refine your search?";
         }
       } else {
-        reply = "Could you please specify which product you're interested in?";
+        reply = "I couldn't find products matching your request.";
+
+        // Provide suggestions based on what was missing
+        if (productNames.length > 0 && category) {
+          reply = `Sorry, we don't have ${productNames.join(
+            " or "
+          )} in ${category} right now.`;
+        } else if (productNames.length > 0) {
+          reply = `Sorry, we don't have ${productNames.join(
+            " or "
+          )} in stock at the moment.`;
+        } else if (category) {
+          reply = `Sorry, we don't have products in ${category} matching your criteria.`;
+        }
+
+        // Add alternative suggestions
+        reply += "\n\nMaybe you'd be interested in these popular items:";
+        const popularProducts = await Product.find({ available: true })
+          .sort({ sold: -1 })
+          .limit(3);
+
+        if (popularProducts.length > 0) {
+          reply +=
+            "\n" +
+            popularProducts
+              .map((p, i) => {
+                const minPrice = Math.min(...p.size.map((s) => s.new_price));
+                return `${i + 1}. ${p.name} - Rs ${minPrice}`;
+              })
+              .join("\n");
+        }
       }
     }
 
