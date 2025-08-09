@@ -25,7 +25,7 @@
 
 /* Dark theme overrides */
 .dark-theme .footer {
-  background-color: var(--dark-bg);
+  background-color: #0f172a;
   color: var(--dark-text);
   border-top: 1px solid #333;
 }
