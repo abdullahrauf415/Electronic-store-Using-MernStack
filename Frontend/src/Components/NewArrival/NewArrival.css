@@ -5,9 +5,12 @@
   justify-content: center;
   gap: 10px;
   margin-bottom: 100px;
-  width: 98%;
+  width: 100%;
+  margin: 50px 0;
   padding: 0 15px;
   text-align: center;
+  border-radius: 8px;
+  padding-bottom: 30px;
 }
 
 .new-arrival h1 {
@@ -15,15 +18,10 @@
   font-size: clamp(32px, 5vw, 50px);
   font-weight: 600;
   margin-bottom: 10px;
+  margin-top: 10px;
 }
 
-.new-arrival hr {
-  width: 200px;
-  height: 6px;
-  border-radius: 10px;
-  background: #252525;
-  margin: 0 auto;
-}
+
 
 .arrival {
   display: grid;
@@ -102,10 +100,9 @@
   color: #f3f4f6; /* Light heading in dark mode */
 }
 
-.dark-theme .new-arrival hr {
-  background: #3b82f6; /* Use a bright accent for the line */
-}
+
 
 .dark-theme .new-arrival {
-  background-color: transparent; /* Optional: keep section background clean */
+  background-color: #1e293b; /* Dark background for new arrivals */
+  color: #f3f4f6; /* Light text color in dark mode */
 }

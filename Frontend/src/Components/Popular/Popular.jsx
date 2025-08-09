@@ -14,7 +14,6 @@ const Popular = () => {
   return (
     <div className="popular">
       <h1>Popular in Home Appliances</h1>
-      <hr />
       <div className="popular-item">
         {popular.map((item) => {
           const firstSize = item.size?.[0] || {};

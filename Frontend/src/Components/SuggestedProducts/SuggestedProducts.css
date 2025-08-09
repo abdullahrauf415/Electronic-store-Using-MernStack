@@ -3,13 +3,16 @@
   --sp-text-muted: #6c757d;
   --sp-border: #dee2e6;
   --sp-bg: #ffffff;
+  --sp-radius: 8px;
 }
 
 .dark-theme {
   --sp-heading: #f1f1f1;
   --sp-text-muted: #aaaaaa;
   --sp-border: #333;
-  --sp-bg: #1e1e1e;
+  --sp-radius: 12px;
+  --sp-hover-bg: #2c3e50;
+  --sp-bg: #1e293b;
 }
 
 .suggested-products {
@@ -17,6 +20,7 @@
   background-color: var(--sp-bg);
   color: var(--sp-heading);
   transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: var(--sp-radius) ;
 }
 
 .suggested-products h2 {

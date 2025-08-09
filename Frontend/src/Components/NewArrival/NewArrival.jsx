@@ -13,7 +13,6 @@ const NewArrival = () => {
   return (
     <div className="new-arrival">
       <h1>New Arrivals</h1>
-      <hr />
       <div className="arrival">
         {new_arrivals.map((item, index) => {
           const firstSize = item.size?.[0] || {};
