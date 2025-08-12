@@ -29,13 +29,7 @@ const __dirname = dirname(__filename);
 
 // Middleware
 app.use(express.json());
-app.use(cors(
-  {
-    origin:["htpps://deploy-mern-1whq.vercel.app"],
-    methods:["POST","GET"],
-    credentlias:true 
-  }
-));
+app.use(cors());
 
 // Ensure upload directory exists
 const uploadDir = process.env.UPLOAD_DIR || "./upload/images";

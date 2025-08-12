@@ -93,9 +93,9 @@ const LoginSignup = () => {
 
         await loginUser(
           response.data.token,
+          response.data.name,
           response.data.email,
-          response.data.isAdmin,
-          response.data.name
+          response.data.isAdmin
         );
         navigate("/");
       } else {

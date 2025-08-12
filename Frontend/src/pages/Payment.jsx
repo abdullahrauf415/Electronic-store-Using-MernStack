@@ -7,7 +7,8 @@ import "./CSS/Payment.css";
 
 const Payment = () => {
   const location = useLocation();
-  const { clearCart, products } = useContext(HomeContext);
+  const { cartItems, clearCart, products, user, getTotalCartAmount } =
+    useContext(HomeContext);
 
   // Extract all necessary data from location.state
   const {
@@ -16,8 +17,7 @@ const Payment = () => {
     address,
     orderNo,
     amount,
-    cartItems, // Added cartItems from location.state
-    totalCartAmount, // Added totalCartAmount from location.state
+    totalCartAmount = getTotalCartAmount(),
   } = location.state || {};
 
   const receiptRef = useRef();
@@ -36,7 +36,9 @@ const Payment = () => {
   const [bankName, setBankName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [accountTitle, setAccountTitle] = useState("");
-  const [transactionId, setTransactionId] = useState("");
+  const [transactionId, setTransactionId] = useState(
+    paymentMethod === "cod" ? `COD-${Date.now()}` : ""
+  );
 
   // Mobile wallet fields
   const [mobileNumber, setMobileNumber] = useState("");
@@ -125,18 +127,67 @@ const Payment = () => {
     setErrorMessage("");
     setLoading(true);
 
-    // Store receipt data before clearing cart
-    setReceiptData({
-      cartItems: { ...cartItems },
-      totalCartAmount,
-    });
+    try {
+      // Generate transaction ID for COD if missing
+      let txnId = transactionId;
+      if (paymentMethod === "cod" && !txnId) {
+        txnId = `COD-${Date.now()}`;
+        setTransactionId(txnId);
+      }
 
-    // Simulate payment processing
-    setTimeout(() => {
+      // Prepare order data
+      const orderData = {
+        email: user?.email || "",
+        items: Object.values(cartItems).map((item) => {
+          const product = products.find((p) => p.id === item.id);
+          return {
+            id: item.id,
+            name: product?.name || "Unknown Product",
+            quantity: item.quantity,
+            price: item.price,
+            size: item.size,
+            color: item.color,
+          };
+        }),
+        total: getTotalAmount(),
+        paymentMethod,
+        transactionId: txnId,
+        address,
+        phone,
+        name,
+      };
+
+      // API call to place order
+      const response = await fetch("http://localhost:3000/place-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token}`,
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Order placement failed");
+      }
+
+      // Store receipt data before clearing cart
+      setReceiptData({
+        cartItems: { ...cartItems },
+        totalCartAmount,
+      });
+
+      // Clear cart after successful order placement
       clearCart();
       setIsPaymentConfirmed(true);
+    } catch (error) {
+      setErrorMessage(
+        error.message || "Failed to place order. Please try again."
+      );
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   const downloadReceipt = () => {

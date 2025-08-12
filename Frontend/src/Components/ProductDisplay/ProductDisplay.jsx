@@ -4,12 +4,10 @@ import HomeContext from "../../Context/HomeContext";
 
 const ProductDisplay = ({ product }) => {
   const { addToCart } = useContext(HomeContext);
-
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [mainImage, setMainImage] = useState(product.image?.[0] || "");
   const [error, setError] = useState("");
-
   const [price, setPrice] = useState({
     new_price: product.new_price || 0,
     old_price: product.old_price || 0,
@@ -73,7 +71,8 @@ const ProductDisplay = ({ product }) => {
     setError("");
     addToCart(product.id, selectedSize, selectedColor);
   };
-  const disconutPercentage =
+
+  const discountPercentage =
     price.old_price && price.new_price
       ? Math.round(
           ((price.old_price - price.new_price) / price.old_price) * 100
@@ -83,78 +82,97 @@ const ProductDisplay = ({ product }) => {
   return (
     <div className="product-display">
       <div className="product-display-left">
-        <div className="product-display-img-list">
-          {product.image?.map((img, i) => (
-            <img
-              key={i}
-              src={img}
-              alt={`${product.name} ${i + 1}`}
-              onClick={() => handleImageClick(img)}
-              className={mainImage === img ? "active-thumb" : ""}
-            />
-          ))}
-        </div>
         <div className="product-display-main-img">
           <img src={mainImage} alt={product.name} className="main-image" />
+
+          {discountPercentage > 0 && (
+            <div className="discount-badge">
+              <span>{discountPercentage}% OFF</span>
+            </div>
+          )}
+
+          {!product.available && (
+            <div className="out-of-stock-overlay">Out of Stock</div>
+          )}
+        </div>
+
+        <div className="product-display-img-list">
+          {product.image?.map((img, i) => (
+            <div
+              key={i}
+              className={`thumbnail-container ${
+                mainImage === img ? "active-thumb" : ""
+              }`}
+              onClick={() => handleImageClick(img)}
+            >
+              <img src={img} alt={`${product.name} ${i + 1}`} />
+            </div>
+          ))}
         </div>
       </div>
 
       <div className="product-display-right">
-        <h1>{product.name}</h1>
-
-        <div className="product-display-prices">
-          <div className="new-price">Rs. {price.new_price}</div>
-          <div className="old-price">Rs. {price.old_price}</div>
-          <div className="product-display-discount">
-            {disconutPercentage > 0 && (
-              <div className="item-discount">{disconutPercentage}% OFF</div>
+        <div className="product-header">
+          <h1>{product.name}</h1>
+          <div className="price-container">
+            <div className="new-price">
+              Rs. {price.new_price.toLocaleString()}
+            </div>
+            {price.old_price > price.new_price && (
+              <div className="old-price">
+                Rs. {price.old_price.toLocaleString()}
+              </div>
             )}
           </div>
-          {!product.available && (
-            <div className="out-of-stock-badge">Out of Stock</div>
-          )}
         </div>
 
-        {product.size?.length > 0 && (
-          <div className="product-options">
-            <h2>Select Size</h2>
-            <div className="size-options">
-              {product.size.map((size, index) => {
-                const label = size.size || size;
-                return (
-                  <button
-                    key={index}
-                    className={selectedSize === label ? "active" : ""}
-                    onClick={() => handleSizeSelect(size)}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
+        <div className="product-options-container">
+          {product.size?.length > 0 && (
+            <div className="product-option">
+              <h2>Select Size</h2>
+              <div className="size-options">
+                {product.size.map((size, index) => {
+                  const label = size.size || size;
+                  return (
+                    <button
+                      key={index}
+                      className={`size-option ${
+                        selectedSize === label ? "active" : ""
+                      }`}
+                      onClick={() => handleSizeSelect(size)}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {product.color?.length > 0 && (
-          <div className="product-options">
-            <h2>Select Color</h2>
-            <div className="color-options">
-              {product.color.map((color) => (
-                <button
-                  key={color}
-                  className={selectedColor === color ? "active" : ""}
-                  onClick={() => setSelectedColor(color)}
-                  style={{
-                    backgroundColor: color.toLowerCase(),
-                    border:
-                      selectedColor === color ? "2px solid black" : "none",
-                  }}
-                  title={color}
-                />
-              ))}
+          {product.color?.length > 0 && (
+            <div className="product-option">
+              <h2>Select Color</h2>
+              <div className="color-options">
+                {product.color.map((color) => (
+                  <div
+                    key={color}
+                    className={`color-option ${
+                      selectedColor === color ? "active" : ""
+                    }`}
+                    onClick={() => setSelectedColor(color)}
+                    title={color}
+                  >
+                    <div
+                      className="color-swatch"
+                      style={{ backgroundColor: color.toLowerCase() }}
+                    />
+                    <span className="color-label">{color}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {error && <div className="error-message">{error}</div>}
 
@@ -164,6 +182,7 @@ const ProductDisplay = ({ product }) => {
           disabled={!product.available}
         >
           {product.available ? "ADD TO CART" : "OUT OF STOCK"}
+          <span className="cart-icon">🛒</span>
         </button>
       </div>
     </div>
