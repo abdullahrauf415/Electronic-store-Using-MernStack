@@ -39,8 +39,8 @@ A full-stack e-commerce web application for selling electronics, gadgets, and ac
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/electronics-gadgets-store.git
-cd electronics-gadgets-store
+git clone https://github.com/abdullahrauf415/Electronic-store-Using-mern
+cd electronic-store
 ```
 
 ### Backend Setup
