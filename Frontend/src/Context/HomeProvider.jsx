@@ -15,8 +15,10 @@ const HomeProvider = ({ children }) => {
       ? savedTheme === "dark"
       : window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
+
   const logout = useCallback(() => {
     localStorage.removeItem("token");
+    localStorage.removeItem("isAdmin");
     setUser(null);
     setIsAdmin(false);
     setCartItems({});
@@ -44,15 +46,21 @@ const HomeProvider = ({ children }) => {
           name: data.name || "", // ✅ Ensure name is set here
         });
 
+        console.log("User verified and logged in:", {
+          email: data.email,
+          name: data.name,
+        });
+
         setIsAdmin(data.isAdmin || false);
 
+        // Fetch user's cart
         const cartRes = await axios.get("http://localhost:3000/get-cart", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         setCartItems(cartRes.data.cartData || {});
       } catch (error) {
-        console.error("Auth failed:", error);
+        console.error("Auth verification failed:", error);
         logout();
       } finally {
         setLoading(false);
@@ -168,16 +176,35 @@ const HomeProvider = ({ children }) => {
     });
   };
 
+  // ✅ Fixed loginUser function with correct parameter order
   const loginUser = async (token, email, isAdminFlag = false, name = "") => {
-    localStorage.setItem("token", token);
-    setUser({ token, email, name }); // ✅ Include name here
-    setIsAdmin(isAdminFlag);
-
     try {
+      localStorage.setItem("token", token);
+      localStorage.setItem("isAdmin", isAdminFlag ? "true" : "false");
+
+      // Set user state with all required fields
+      setUser({
+        token,
+        email: email || "",
+        name: name || "",
+      });
+
+      setIsAdmin(isAdminFlag);
+
+      console.log("LoginUser called with:", {
+        token: token ? "***" : "null",
+        email,
+        name,
+        isAdmin: isAdminFlag,
+      });
+
+      // Fetch user's cart after login
       const cartRes = await axios.get("http://localhost:3000/get-cart", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCartItems(cartRes.data.cartData || {});
+
+      console.log("User successfully logged in:", { email, name });
     } catch (error) {
       console.error("Failed to fetch cart after login:", error);
     }
@@ -237,7 +264,7 @@ const HomeProvider = ({ children }) => {
     getTotalItemsInCart();
   }, [cartItems, getTotalItemsInCart]);
 
-  //toggle dark mode
+  // Toggle dark mode
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
@@ -253,6 +280,11 @@ const HomeProvider = ({ children }) => {
       document.body.classList.remove("dark-theme");
     }
   }, [darkMode]);
+
+  // Debug: Log user state changes
+  useEffect(() => {
+    console.log("User state updated:", user);
+  }, [user]);
 
   return (
     <HomeContext.Provider

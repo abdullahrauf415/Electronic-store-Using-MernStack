@@ -3,7 +3,7 @@ import "./ProductDisplay.css";
 import HomeContext from "../../Context/HomeContext";
 
 const ProductDisplay = ({ product }) => {
-  const { addToCart } = useContext(HomeContext);
+  const { addToCart, isAdmin } = useContext(HomeContext);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [mainImage, setMainImage] = useState(product.image?.[0] || "");
@@ -54,6 +54,8 @@ const ProductDisplay = ({ product }) => {
   };
 
   const handleAddToCart = () => {
+    if (isAdmin) return; // Prevent adding to cart if admin
+
     const errors = [];
 
     if (product.size?.length && !selectedSize) {
@@ -78,6 +80,10 @@ const ProductDisplay = ({ product }) => {
           ((price.old_price - price.new_price) / price.old_price) * 100
         )
       : 0;
+
+  // Check if admin is logged in
+  const isAdminMode = isAdmin;
+  const buttonDisabled = !product.available || isAdminMode;
 
   return (
     <div className="product-display">
@@ -178,11 +184,17 @@ const ProductDisplay = ({ product }) => {
 
         <button
           onClick={handleAddToCart}
-          className={`add-to-cart ${!product.available ? "disabled" : ""}`}
-          disabled={!product.available}
+          className={`add-to-cart ${buttonDisabled ? "disabled" : ""}`}
+          disabled={buttonDisabled}
         >
-          {product.available ? "ADD TO CART" : "OUT OF STOCK"}
-          <span className="cart-icon">🛒</span>
+          {isAdminMode
+            ? "You are admin"
+            : !product.available
+            ? "OUT OF STOCK"
+            : "ADD TO CART"}
+          {!isAdminMode && product.available && (
+            <span className="cart-icon">🛒</span>
+          )}
         </button>
       </div>
     </div>

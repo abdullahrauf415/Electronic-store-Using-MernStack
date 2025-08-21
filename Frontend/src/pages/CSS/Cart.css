@@ -1,0 +1,122 @@
+/* Cart.css */
+.admin-cart-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: 20px;
+  background-color: var(--light-bg);
+}
+
+.dark-theme .admin-cart-message {
+  background-color: var(--dark-bg);
+}
+
+.admin-cart-container {
+  max-width: 600px;
+  padding: 40px;
+  border-radius: 20px;
+  background-color: var(--light-surface);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.dark-theme .admin-cart-container {
+  background-color: var(--dark-surface);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.admin-cart-container h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: var(--light-text);
+}
+
+.dark-theme .admin-cart-container h2 {
+  color: var(--dark-text);
+}
+
+.admin-cart-container p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  color: var(--light-text);
+  line-height: 1.6;
+}
+
+.dark-theme .admin-cart-container p {
+  color: var(--dark-text);
+}
+
+.admin-cart-options {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.continue-shopping-btn,
+.logout-btn {
+  padding: 12px 30px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.continue-shopping-btn {
+  background: linear-gradient(135deg, var(--light-accent), #3730a3);
+  color: white;
+  text-decoration: none;
+}
+
+.dark-theme .continue-shopping-btn {
+  background: linear-gradient(135deg, var(--dark-accent), #4f46e5);
+}
+
+.continue-shopping-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+}
+
+.dark-theme .continue-shopping-btn:hover {
+  box-shadow: 0 10px 20px rgba(129, 140, 248, 0.3);
+}
+
+.logout-btn {
+  background: transparent;
+  border: 2px solid var(--light-border);
+  color: var(--light-text);
+}
+
+.dark-theme .logout-btn {
+  border: 2px solid var(--dark-border);
+  color: var(--dark-text);
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 71, 87, 0.1);
+  border-color: var(--light-error);
+  color: var(--light-error);
+}
+
+.dark-theme .logout-btn:hover {
+  background-color: rgba(255, 107, 129, 0.1);
+  border-color: var(--dark-error);
+  color: var(--dark-error);
+}
+
+@media (max-width: 768px) {
+  .admin-cart-container {
+    padding: 30px 20px;
+  }
+  
+  .admin-cart-container h2 {
+    font-size: 24px;
+  }
+  
+  .admin-cart-container p {
+    font-size: 16px;
+  }
+}

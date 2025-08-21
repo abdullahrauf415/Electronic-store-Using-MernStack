@@ -1,10 +1,15 @@
-/* UserProfile.css */
+/* UserProfile.css - Optimized for responsiveness & accessibility */
 .user-profile-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
   min-height: 80vh;
   transition: all 0.4s ease;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 /* Theme Variables */
@@ -18,7 +23,7 @@
   --light-hover: #f0f4ff;
   --light-shadow: rgba(0, 0, 0, 0.08);
   --light-error: #ff4757;
-  
+
   /* Dark Theme */
   --dark-bg: #121212;
   --dark-card: #1e1e1e;
@@ -53,33 +58,27 @@ body.dark-theme {
 }
 
 /* Base Styles */
-.user-profile-container {
-  background: var(--bg);
-  color: var(--text);
-}
-
 .profile-section {
   background: var(--card);
   border-radius: 12px;
   box-shadow: 0 4px 20px var(--shadow);
   padding: 1.5rem;
-  margin-bottom: 2rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid var(--border);
 }
 
 .profile-section:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
   box-shadow: 0 6px 25px var(--shadow);
 }
 
 h1, h2 {
   color: var(--accent);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 h1 {
-  font-size: 2.5rem;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
   text-align: center;
   position: relative;
   padding-bottom: 1rem;
@@ -91,16 +90,16 @@ h1::after {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 100px;
-  height: 4px;
+  width: 80px;
+  height: 3px;
   background: linear-gradient(90deg, var(--accent), transparent);
   border-radius: 2px;
 }
 
 .user-info p {
-  font-size: 1.1rem;
+  font-size: 1rem;
   margin: 0.5rem 0;
-  padding: 0.5rem;
+  padding: 0.6rem 0.8rem;
   background: var(--hover);
   border-radius: 8px;
 }
@@ -113,10 +112,11 @@ h1::after {
 .cartitem-format-main, 
 .cartitem-format {
   display: grid;
-  grid-template-columns: 1fr 2fr 1.5fr 1fr 1fr 1fr 0.5fr;
-  gap: 1rem;
+  grid-template-columns: 1fr 2fr 1fr 1fr 1fr 0.6fr;
+  gap: 0.8rem;
   align-items: center;
-  min-width: 800px;
+  min-width: 700px;
+  font-size: 0.95rem;
 }
 
 .cartitem-format-main p {
@@ -124,16 +124,9 @@ h1::after {
   color: var(--accent);
 }
 
-.cartitem-field {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 0;
-}
-
 .carticon-product-icon {
-  width: 60px;
-  height: 60px;
+  width: 55px;
+  height: 55px;
   object-fit: cover;
   border-radius: 8px;
   transition: transform 0.3s ease;
@@ -145,24 +138,24 @@ h1::after {
 
 .variant-badge {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
-  margin: 0.1rem;
+  padding: 0.3rem 0.6rem;
+  margin: 0.15rem;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   background: var(--accent);
-  color: white;
+  color: #fff;
 }
 
 .cartitems-quantity {
   background: var(--hover);
   border: none;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: default;
+  font-size: 0.9rem;
 }
 
 .cart-items-remove {
@@ -192,23 +185,20 @@ h1::after {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px var(--shadow);
+  font-size: 0.95rem;
 }
 
 .order-history-table th,
 .order-history-table td {
-  padding: 1rem;
+  padding: 0.8rem;
   text-align: center;
   border-bottom: 1px solid var(--border);
+  word-break: break-word;
 }
 
 .order-history-table th {
   background: var(--accent);
-  color: white;
-  font-weight: 600;
-}
-
-.order-history-table tr {
-  transition: background 0.3s ease;
+  color: #fff;
 }
 
 .order-history-table tr:nth-child(even) {
@@ -216,43 +206,25 @@ h1::after {
 }
 
 .order-history-table tr:hover {
-  background: rgba(var(--accent-rgb), 0.1);
+  background: rgba(0, 0, 0, 0.05);
 }
 
-.status-pending {
-  color: #ff9f43;
-  font-weight: 600;
-}
-
-.status-processing {
-  color: #2e86de;
-  font-weight: 600;
-}
-
-.status-shipped {
-  color: #54a0ff;
-  font-weight: 600;
-}
-
-.status-delivered {
-  color: #10ac84;
-  font-weight: 600;
-}
-
-.status-cancelled {
-  color: var(--error);
-  font-weight: 600;
-}
+/* Status Colors */
+.status-pending { color: #ff9f43; font-weight: 600; }
+.status-processing { color: #2e86de; font-weight: 600; }
+.status-shipped { color: #54a0ff; font-weight: 600; }
+.status-delivered { color: #10ac84; font-weight: 600; }
+.status-cancelled { color: var(--error); font-weight: 600; }
 
 .remove-order-btn {
   background: var(--error);
-  color: white;
+  color: #fff;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .remove-order-btn:not([disabled]):hover {
@@ -269,10 +241,7 @@ h1::after {
 /* Confirmation Modal */
 .confirmation-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
@@ -284,8 +253,8 @@ h1::after {
 
 .modal-content {
   background: var(--card);
-  padding: 2rem;
-  border-radius: 16px;
+  padding: 1.5rem;
+  border-radius: 12px;
   max-width: 500px;
   width: 90%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -297,21 +266,24 @@ h1::after {
   display: flex;
   justify-content: center;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1.2rem;
+  flex-wrap: wrap;
 }
 
 .confirm-btn, .cancel-btn {
-  padding: 0.8rem 1.8rem;
+  padding: 0.7rem 1.5rem;
   border: none;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 1;
+  min-width: 120px;
 }
 
 .confirm-btn {
   background: var(--error);
-  color: white;
+  color: #fff;
 }
 
 .cancel-btn {
@@ -319,32 +291,12 @@ h1::after {
   color: var(--text);
 }
 
-.confirm-btn:hover {
-  background: #ff2e4e;
-  transform: translateY(-2px);
-}
-
-.cancel-btn:hover {
-  background: var(--hover);
-  transform: translateY(-2px);
-}
+.confirm-btn:hover { background: #ff2e4e; transform: translateY(-2px); }
+.cancel-btn:hover { background: var(--hover); transform: translateY(-2px); }
 
 /* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { 
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to { 
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* Error State */
 .error-state {
@@ -353,66 +305,41 @@ h1::after {
   justify-content: center;
   min-height: 300px;
   text-align: center;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: var(--error);
 }
 
 /* Responsive Design */
 @media (max-width: 992px) {
-  .profile-section {
-    padding: 1.2rem;
-  }
-  
-  h1 {
-    font-size: 2.2rem;
+  .cartitem-format-main, .cartitem-format {
+    grid-template-columns: 1fr 1.5fr 1fr 0.8fr;
+    min-width: auto;
+    font-size: 0.85rem;
   }
 }
 
 @media (max-width: 768px) {
-  .user-profile-container {
-    padding: 1.5rem;
-  }
-  
-  .profile-section {
-    padding: 1rem;
-  }
-  
-  h1 {
-    font-size: 1.8rem;
-  }
-  
-  h2 {
-    font-size: 1.4rem;
-  }
-  
-  .cartitem-format-main,
-  .cartitem-format {
-    font-size: 0.9rem;
-  }
+  .user-profile-container { padding: 1rem; }
+  .profile-section { padding: 1rem; }
+  .order-history-table, .cart-items { font-size: 0.85rem; }
+  .carticon-product-icon { width: 45px; height: 45px; }
 }
 
 @media (max-width: 576px) {
-  .user-profile-container {
-    padding: 1rem;
+  .cartitem-format-main, .cartitem-format {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
-  
-  .modal-content {
-    padding: 1.5rem;
+
+  .order-history-table th, .order-history-table td {
+    padding: 0.5rem;
+    font-size: 0.8rem;
   }
-  
-  .confirm-btn, 
-  .cancel-btn {
-    padding: 0.6rem 1.5rem;
-  }
-  
-  .order-history-table th,
-  .order-history-table td {
-    padding: 0.8rem 0.5rem;
-    font-size: 0.85rem;
-  }
-  
+
   .remove-order-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
   }
 }

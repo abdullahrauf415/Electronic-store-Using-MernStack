@@ -207,9 +207,6 @@ const Footer = () => {
             <div className="payment-method">Visa</div>
             <div className="payment-method">MasterCard</div>
             <div className="payment-method">Cash on delivery</div>
-            <div className="payment-method">Bank Transfer</div>
-            <div className="payment-method">EasyPaisa</div>
-            <div className="payment-method">JazzCash</div>
           </div>
         </div>
       </div>

@@ -39,7 +39,7 @@ if (!fs.existsSync(uploadDir)) {
 
 // MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI || "mongodb://localhost:27017")
   .then(async () => {
     console.log("Connected to MongoDB");
     await createAdminUser();
@@ -277,8 +277,17 @@ app.post("/signup", async (req, res) => {
   await user.save();
 
   const data = { user: { id: user.id, name: user.name } };
-  const token = jsonwebtoken.sign(data, "secret_ecom", { expiresIn: "1h" });
-  res.json({ success: true, token });
+  const token = jsonwebtoken.sign(data, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
+
+  res.json({
+    success: true,
+    token,
+    name: user.name,
+    email: user.email,
+    isAdmin: user.isAdmin,
+  });
 });
 
 // Login
@@ -303,6 +312,7 @@ app.post("/login", async (req, res) => {
   res.json({
     success: true,
     token,
+    name: user.name,
     email: user.email,
     isAdmin: user.isAdmin,
   });

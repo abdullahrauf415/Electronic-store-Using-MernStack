@@ -7,7 +7,9 @@ import {
   FaLinkedin,
   FaYoutube,
   FaPinterest,
+  FaWhatsapp,
 } from "react-icons/fa";
+
 import HomeContext from "../../Context/HomeContext";
 import axios from "axios";
 import "./AdminSocialMedia.css";
@@ -19,6 +21,7 @@ const platformIcons = {
   linkedin: <FaLinkedin />,
   youtube: <FaYoutube />,
   pinterest: <FaPinterest />,
+  whatsapp: <FaWhatsapp />,
   other: <FaPlus />,
 };
 
@@ -241,6 +244,7 @@ const AdminSocialMedia = () => {
                 <option value="linkedin">LinkedIn</option>
                 <option value="youtube">YouTube</option>
                 <option value="pinterest">Pinterest</option>
+                <option value="whatsapp">WhatsApp</option>
                 <option value="other">Other</option>
               </select>
             </div>

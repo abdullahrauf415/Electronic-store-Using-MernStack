@@ -21,7 +21,9 @@ const ChatBot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const messagesEndRef = useRef(null);
+  const chatWindowRef = useRef(null); // ✅ ref for outside click
 
+  // Load chat history when chat opens
   useEffect(() => {
     if (isOpen && user?.token) {
       fetchChatHistory();
@@ -30,9 +32,29 @@ const ChatBot = () => {
     }
   }, [isOpen, user]);
 
+  // Scroll to bottom on new messages
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // ✅ Close chat when clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        chatWindowRef.current &&
+        !chatWindowRef.current.contains(event.target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -40,7 +62,7 @@ const ChatBot = () => {
     }
   };
 
-  // Function to detect and format URLs
+  // Detect and format URLs inside messages
   const formatMessageWithLinks = (text) => {
     if (!text) return text;
 
@@ -65,6 +87,7 @@ const ChatBot = () => {
     });
   };
 
+  // Fetch history from backend
   const fetchChatHistory = async () => {
     try {
       const response = await axios.get(
@@ -76,10 +99,9 @@ const ChatBot = () => {
 
       const fullChat = [];
       const historyList = [];
-      const seenIds = new Set(); // Track seen IDs to prevent duplicates
+      const seenIds = new Set();
 
       response.data.forEach((msg) => {
-        // Skip duplicate messages
         if (seenIds.has(msg._id)) return;
         seenIds.add(msg._id);
 
@@ -114,6 +136,7 @@ const ChatBot = () => {
     }
   };
 
+  // Send new message
   const handleSendMessage = async () => {
     if (!inputText.trim() || isLoading || !user) return;
 
@@ -161,6 +184,7 @@ const ChatBot = () => {
     }
   };
 
+  // Delete message
   const handleDeleteMessage = async (id) => {
     try {
       await axios.delete(`http://localhost:3000/api/chat-messages/${id}`, {
@@ -176,6 +200,7 @@ const ChatBot = () => {
     }
   };
 
+  // Clear all messages
   const handleClearChat = async () => {
     try {
       await axios.delete("http://localhost:3000/api/chat-messages", {
@@ -189,6 +214,7 @@ const ChatBot = () => {
     }
   };
 
+  // Enter key handling
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -196,6 +222,7 @@ const ChatBot = () => {
     }
   };
 
+  // Select old conversation
   const handleSelectPastMessage = (id) => {
     setSelectedChatId(id);
     const selected = messages.filter(
@@ -223,7 +250,7 @@ const ChatBot = () => {
           <span className="chat-text">Chat Support</span>
         </button>
       ) : (
-        <div className="chatbot-window">
+        <div className="chatbot-window" ref={chatWindowRef}>
           <div className="chatbot-header">
             <div className="chatbot-title">
               <FaRobot className="robot-icon" />
@@ -242,7 +269,7 @@ const ChatBot = () => {
           </div>
 
           <div className="chatbot-body">
-            {/* === Sidebar for Past Chats === */}
+            {/* Sidebar */}
             <div className="chatbot-sidebar">
               <h4>Past Chats</h4>
               <ul>
@@ -263,7 +290,7 @@ const ChatBot = () => {
               )}
             </div>
 
-            {/* === Main Chat Window === */}
+            {/* Chat Messages */}
             <div className="chatbot-messages">
               {messages.length === 0 && !isLoading ? (
                 <div className="empty-chat">
@@ -314,7 +341,7 @@ const ChatBot = () => {
             </div>
           </div>
 
-          {/* === Input Area === */}
+          {/* Input area */}
           {!selectedChatId && (
             <div className="chatbot-input-area">
               <textarea
@@ -333,7 +360,6 @@ const ChatBot = () => {
             </div>
           )}
 
-          {/* === Footer === */}
           <div className="chatbot-footer">
             <button
               className="clear-chat-btn"

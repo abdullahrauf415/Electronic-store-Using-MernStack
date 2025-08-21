@@ -82,6 +82,7 @@ const LoginSignup = () => {
           };
 
       const response = await axios.post(endpoint, requestBody);
+
       setLoading(false);
 
       if (response.data?.success && response.data.token) {
@@ -91,12 +92,19 @@ const LoginSignup = () => {
           response.data.isAdmin ? "true" : "false"
         );
 
+        // parameter order: token, email, isAdmin, name
         await loginUser(
           response.data.token,
-          response.data.name,
           response.data.email,
-          response.data.isAdmin
+          response.data.isAdmin,
+          response.data.name
         );
+
+        console.log("User logged in with:", {
+          name: response.data.name,
+          email: response.data.email,
+        });
+
         navigate("/");
       } else {
         alert(response.data?.message || "Authentication failed");
@@ -107,7 +115,7 @@ const LoginSignup = () => {
         err.response?.data?.message ||
         err.response?.data?.errors ||
         "Authentication failed";
-      console.error(errorMessage);
+      console.error("Login error:", errorMessage);
       alert(errorMessage);
     }
   };
