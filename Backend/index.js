@@ -39,7 +39,9 @@ if (!fs.existsSync(uploadDir)) {
 
 // MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URI || "mongodb://localhost:27017")
+  .connect(
+    process.env.MONGO_URI || "mongodb://localhost:27017/electronicsStore"
+  )
   .then(async () => {
     console.log("Connected to MongoDB");
     await createAdminUser();
