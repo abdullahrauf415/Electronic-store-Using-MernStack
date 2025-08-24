@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from "react";
+import React, { useState, useContext, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import HomeContext from "../Context/HomeContext";
 import jsPDF from "jspdf";
@@ -10,7 +10,6 @@ const Payment = () => {
   const { cartItems, clearCart, products, user, getTotalCartAmount } =
     useContext(HomeContext);
 
-  // Extract all necessary data from location.state
   const {
     name,
     phone,
@@ -22,7 +21,6 @@ const Payment = () => {
 
   const receiptRef = useRef();
 
-  // Payment method states
   const [paymentMethod, setPaymentMethod] = useState("card");
 
   // Card payment fields
@@ -32,29 +30,43 @@ const Payment = () => {
   const [cardName, setCardName] = useState("");
   const [cardBrand, setCardBrand] = useState("");
 
-  // Bank transfer fields
-  const [bankName, setBankName] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [accountTitle, setAccountTitle] = useState("");
   const [transactionId, setTransactionId] = useState(
     paymentMethod === "cod" ? `COD-${Date.now()}` : ""
   );
 
-  // Mobile wallet fields
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [cnic, setCnic] = useState("");
-
   const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
-  // Store receipt data separately
   const [receiptData, setReceiptData] = useState({
     cartItems: {},
     totalCartAmount: 0,
   });
 
-  // Format card number with spaces
+  useEffect(() => {
+    if (isPaymentConfirmed && products.length > 0) {
+      const imageUrls = [];
+      Object.entries(receiptData.cartItems).forEach(([key, cartItem]) => {
+        const product = products.find((p) => p.id === cartItem.id);
+        if (product && product.image && product.image[0]) {
+          imageUrls.push(product.image[0]);
+        }
+      });
+      const loadImage = (url) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = url;
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      };
+      Promise.all(imageUrls.map((url) => loadImage(url)))
+        .then(() => setImagesLoaded(true))
+        .catch(() => setImagesLoaded(true));
+    }
+  }, [isPaymentConfirmed, receiptData.cartItems, products]);
+
   const formatCardNumber = (value) => {
     return value
       .replace(/\D/g, "")
@@ -62,7 +74,6 @@ const Payment = () => {
       .trim();
   };
 
-  // Format expiry date as MM/YY
   const formatExpiryDate = (value) => {
     const cleaned = value.replace(/\D/g, "");
     if (cleaned.length >= 3) {
@@ -81,17 +92,8 @@ const Payment = () => {
           cvv.length === 3 &&
           cardName
         );
-
-      case "bank":
-        return bankName && accountNumber && accountTitle && transactionId;
-
-      case "easypaisa":
-      case "jazzcash":
-        return mobileNumber.length === 11 && cnic.length === 13;
-
       case "cod":
         return true;
-
       default:
         return false;
     }
@@ -101,12 +103,6 @@ const Payment = () => {
     switch (paymentMethod) {
       case "card":
         return cardBrand;
-      case "bank":
-        return "Bank Transfer";
-      case "easypaisa":
-        return "EasyPaisa";
-      case "jazzcash":
-        return "JazzCash";
       case "cod":
         return "Cash on Delivery";
       default:
@@ -128,14 +124,12 @@ const Payment = () => {
     setLoading(true);
 
     try {
-      // Generate transaction ID for COD if missing
       let txnId = transactionId;
       if (paymentMethod === "cod" && !txnId) {
         txnId = `COD-${Date.now()}`;
         setTransactionId(txnId);
       }
 
-      // Prepare order data
       const orderData = {
         email: user?.email || "",
         items: Object.values(cartItems).map((item) => {
@@ -157,7 +151,6 @@ const Payment = () => {
         name,
       };
 
-      // API call to place order
       const response = await fetch("http://localhost:3000/place-order", {
         method: "POST",
         headers: {
@@ -172,13 +165,11 @@ const Payment = () => {
         throw new Error(errorData.message || "Order placement failed");
       }
 
-      // Store receipt data before clearing cart
       setReceiptData({
         cartItems: { ...cartItems },
         totalCartAmount,
       });
 
-      // Clear cart after successful order placement
       clearCart();
       setIsPaymentConfirmed(true);
     } catch (error) {
@@ -191,16 +182,48 @@ const Payment = () => {
   };
 
   const downloadReceipt = () => {
+    if (!imagesLoaded) {
+      alert("Please wait for images to load before downloading receipt.");
+      return;
+    }
     const input = receiptRef.current;
-    html2canvas(input, { scale: 2 }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`receipt-${orderNo}.pdf`);
+    const images = input.getElementsByTagName("img");
+    const imagePromises = [];
+    for (let i = 0; i < images.length; i++) {
+      const img = images[i];
+      if (!img.complete) {
+        const promise = new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+        imagePromises.push(promise);
+      }
+    }
+    Promise.all(imagePromises).then(() => {
+      html2canvas(input, {
+        scale: 3,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      }).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png", 1.0);
+        const pdf = new jsPDF("p", "mm", "a4");
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        const margin = 10;
+        const contentWidth = pdfWidth - margin * 2;
+        const contentHeight = (imgProps.height * contentWidth) / imgProps.width;
+        pdf.addImage(
+          imgData,
+          "PNG",
+          margin,
+          margin,
+          contentWidth,
+          contentHeight
+        );
+        pdf.save(`receipt-${orderNo}.pdf`);
+      });
     });
   };
 
@@ -218,6 +241,7 @@ const Payment = () => {
   if (isPaymentConfirmed) {
     return (
       <div className="payment-confirmation">
+        {/* Success Message */}
         <div className="success-animation">
           <svg
             className="checkmark"
@@ -240,6 +264,7 @@ const Payment = () => {
           <h1>Payment Successful!</h1>
         </div>
 
+        {/* Order Summary */}
         <div className="order-summary">
           <p>
             <strong>Order Number:</strong> #{orderNo}
@@ -259,6 +284,7 @@ const Payment = () => {
           </p>
         </div>
 
+        {/* Customer Details */}
         <div className="customer-details">
           <h3>Customer Information</h3>
           <p>
@@ -272,6 +298,7 @@ const Payment = () => {
           </p>
         </div>
 
+        {/* Receipt */}
         <div ref={receiptRef} className="receipt-content">
           <h2 className="receipt-header">Order Receipt</h2>
           <div className="receipt-details">
@@ -296,7 +323,6 @@ const Payment = () => {
           {Object.entries(receiptData.cartItems).map(([key, cartItem]) => {
             const product = products.find((p) => p.id === cartItem.id);
             if (!product) return null;
-
             return (
               <div key={key} className="confirmation-item">
                 <div className="confirmation-field">
@@ -304,6 +330,7 @@ const Payment = () => {
                     src={product.image[0]}
                     alt={product.name}
                     className="confirmation-product-icon"
+                    crossOrigin="anonymous"
                   />
                 </div>
                 <div className="confirmation-field">
@@ -375,10 +402,13 @@ const Payment = () => {
         </div>
 
         <div className="confirmation-actions">
-          <button className="download-receipt-btn" onClick={downloadReceipt}>
-            Download Receipt
+          <button
+            className="download-receipt-btn"
+            onClick={downloadReceipt}
+            disabled={!imagesLoaded}
+          >
+            {imagesLoaded ? "Download Receipt" : "Loading Images..."}
           </button>
-
           <Link to="/" className="continue-shopping-btn">
             Continue Shopping
           </Link>
@@ -400,28 +430,6 @@ const Payment = () => {
           Credit/Debit Card
         </button>
         <button
-          className={`method-btn ${paymentMethod === "bank" ? "active" : ""}`}
-          onClick={() => setPaymentMethod("bank")}
-        >
-          Bank Transfer
-        </button>
-        <button
-          className={`method-btn ${
-            paymentMethod === "easypaisa" ? "active" : ""
-          }`}
-          onClick={() => setPaymentMethod("easypaisa")}
-        >
-          EasyPaisa
-        </button>
-        <button
-          className={`method-btn ${
-            paymentMethod === "jazzcash" ? "active" : ""
-          }`}
-          onClick={() => setPaymentMethod("jazzcash")}
-        >
-          JazzCash
-        </button>
-        <button
           className={`method-btn ${paymentMethod === "cod" ? "active" : ""}`}
           onClick={() => setPaymentMethod("cod")}
         >
@@ -429,7 +437,7 @@ const Payment = () => {
         </button>
       </div>
 
-      {/* Card Payment Form */}
+      {/* Card Payment */}
       {paymentMethod === "card" && (
         <>
           <div className="form-group">
@@ -460,7 +468,6 @@ const Payment = () => {
                 placeholder="e.g., Muhammad Abdullah"
               />
             </div>
-
             <div className="form-group">
               <label>Card Number</label>
               <input
@@ -473,7 +480,6 @@ const Payment = () => {
                 maxLength={19}
               />
             </div>
-
             <div className="form-row">
               <div className="form-group">
                 <label>Expiry Date</label>
@@ -487,7 +493,6 @@ const Payment = () => {
                   maxLength={5}
                 />
               </div>
-
               <div className="form-group">
                 <label>CVV</label>
                 <input
@@ -503,207 +508,7 @@ const Payment = () => {
         </>
       )}
 
-      {/* Bank Transfer Form */}
-      {paymentMethod === "bank" && (
-        <div className="bank-form">
-          <div className="form-group">
-            <label>Bank Name</label>
-            <select
-              value={bankName}
-              onChange={(e) => setBankName(e.target.value)}
-              required
-            >
-              <option value="">Select Bank</option>
-              <option value="HBL">HBL</option>
-              <option value="UBL">UBL</option>
-              <option value="MCB">MCB</option>
-              <option value="Allied Bank">Allied Bank</option>
-              <option value="Bank Alfalah">Bank Alfalah</option>
-              <option value="Meezan Bank">Meezan Bank</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Account Title</label>
-            <input
-              type="text"
-              value={accountTitle}
-              onChange={(e) => setAccountTitle(e.target.value)}
-              placeholder="e.g., Muhammad Abdullah"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Account Number</label>
-            <input
-              type="text"
-              value={accountNumber}
-              onChange={(e) =>
-                setAccountNumber(e.target.value.replace(/\D/g, ""))
-              }
-              placeholder="e.g., 123456789"
-              maxLength={20}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Transaction ID</label>
-            <input
-              type="text"
-              value={transactionId}
-              onChange={(e) => setTransactionId(e.target.value)}
-              placeholder="Enter bank transaction ID"
-              required
-            />
-          </div>
-
-          <div className="bank-instructions">
-            <h4>Transfer Instructions:</h4>
-            <p>1. Transfer the amount to the following account:</p>
-            <p>
-              <strong>Account Name:</strong> Electronics Store
-            </p>
-            <p>
-              <strong>Account Number:</strong> PK12 ABCD 1234 5678 9012 3456
-            </p>
-            <p>
-              <strong>Bank:</strong> HBL
-            </p>
-            <p>
-              2. After transfer, enter your details above and click "Confirm
-              Bank Transfer"
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* EasyPaisa Form */}
-      {paymentMethod === "easypaisa" && (
-        <div className="mobile-wallet-form">
-          <div className="form-group">
-            <label>Mobile Number</label>
-            <input
-              type="tel"
-              value={mobileNumber}
-              onChange={(e) =>
-                setMobileNumber(
-                  e.target.value.replace(/\D/g, "").substring(0, 11)
-                )
-              }
-              placeholder="03XX XXXXXX"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>CNIC Number</label>
-            <input
-              type="text"
-              value={cnic}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, "");
-                // Format as XXXXX-XXXXXXX-X
-                if (val.length <= 13) {
-                  setCnic(val);
-                }
-              }}
-              placeholder="XXXXX-XXXXXXX-X"
-              maxLength={15}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Transaction ID</label>
-            <input
-              type="text"
-              value={transactionId}
-              onChange={(e) => setTransactionId(e.target.value)}
-              placeholder="Enter EasyPaisa transaction ID"
-              required
-            />
-          </div>
-
-          <div className="wallet-instructions">
-            <h4>EasyPaisa Payment Instructions:</h4>
-            <p>1. Open your EasyPaisa app</p>
-            <p>2. Go to "Send Money"</p>
-            <p>
-              3. Enter our EasyPaisa Account: <strong>0312 3456789</strong>
-            </p>
-            <p>
-              4. Enter amount: <strong>Rs. {amount}</strong>
-            </p>
-            <p>5. Complete the transaction and enter details above</p>
-          </div>
-        </div>
-      )}
-
-      {/* JazzCash Form */}
-      {paymentMethod === "jazzcash" && (
-        <div className="mobile-wallet-form">
-          <div className="form-group">
-            <label>Mobile Number</label>
-            <input
-              type="tel"
-              value={mobileNumber}
-              onChange={(e) =>
-                setMobileNumber(
-                  e.target.value.replace(/\D/g, "").substring(0, 11)
-                )
-              }
-              placeholder="03XX XXXXXX"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>CNIC Number</label>
-            <input
-              type="text"
-              value={cnic}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, "");
-                // Format as XXXXX-XXXXXXX-X
-                if (val.length <= 13) {
-                  setCnic(val);
-                }
-              }}
-              placeholder="XXXXX-XXXXXXX-X"
-              maxLength={15}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Transaction ID</label>
-            <input
-              type="text"
-              value={transactionId}
-              onChange={(e) => setTransactionId(e.target.value)}
-              placeholder="Enter JazzCash transaction ID"
-              required
-            />
-          </div>
-
-          <div className="wallet-instructions">
-            <h4>JazzCash Payment Instructions:</h4>
-            <p>1. Open your JazzCash app</p>
-            <p>2. Go to "Send Money"</p>
-            <p>
-              3. Enter our JazzCash Account: <strong>0300 1234567</strong>
-            </p>
-            <p>
-              4. Enter amount: <strong>Rs. {amount}</strong>
-            </p>
-            <p>5. Complete the transaction and enter details above</p>
-          </div>
-        </div>
-      )}
-
-      {/* Cash on Delivery */}
+      {/* COD */}
       {paymentMethod === "cod" && (
         <div className="cod-info">
           <h3>Cash on Delivery</h3>
@@ -728,9 +533,7 @@ const Payment = () => {
           ? "Processing..."
           : paymentMethod === "card"
           ? `Pay RS.${amount}`
-          : paymentMethod === "cod"
-          ? `Confirm COD Order (RS.${amount + 50})`
-          : `Confirm ${getPaymentMethodDisplay()} Payment`}
+          : `Confirm COD Order (RS.${amount + 50})`}
       </button>
 
       <Link to="/checkout" className="back-link">
